@@ -1,6 +1,0 @@
-<component name="ArtifactManager">
-  <artifact build-on-make="true" name="common">
-    <output-path>$PROJECT_DIR$/common/java</output-path>
-    <root id="root" />
-  </artifact>
-</component>
