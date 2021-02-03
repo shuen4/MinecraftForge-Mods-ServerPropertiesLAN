@@ -28,6 +28,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.UserListWhitelist;
+import net.minecraft.util.HttpUtil;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -65,6 +66,8 @@ public class splan {
   
   @SubscribeEvent
   public void test(EntityJoinWorldEvent event) {
+    if (port<=0||port>65535)
+	port = HttpUtil.getSuitableLanPort();
     try {
     	//1.13
       if (event.getEntity() instanceof net.minecraft.entity.player.EntityPlayer && !sent) {
