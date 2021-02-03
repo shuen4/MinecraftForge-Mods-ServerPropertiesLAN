@@ -29,6 +29,7 @@ import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.util.HttpUtil;
+import net.minecraft.util.HTTPUtil;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -66,10 +67,13 @@ public class splan {
   
   @SubscribeEvent
   public void test(EntityJoinWorldEvent event) {
-    if (port<=0||port>65535)
-	port = HttpUtil.getSuitableLanPort();
-    try {
-    	//1.13
+	if (port<=0||port>65535)
+		try {//1.13
+		port = HttpUtil.getSuitableLanPort();
+		} catch (Error E1) {//1.14 - 1.16
+			port = HTTPUtil.func_76181_a();
+		}
+    try {//1.13
       if (event.getEntity() instanceof net.minecraft.entity.player.EntityPlayer && !sent) {
         event.getEntity().sendMessage((ITextComponent)new TextComponentString("Server Status:"));
         event.getEntity().sendMessage((ITextComponent)new TextComponentString("online-mode = " + server.isServerInOnlineMode()));
@@ -112,8 +116,7 @@ public class splan {
         sent = true;
       } 
     } catch (Error E1) {
-    	try {
-    	  //1.14 - 1.15
+    	try {//1.14 - 1.15
 	      if (event.getEntity() instanceof net.minecraft.entity.player.PlayerEntity && !sent) {
 	        event.getEntity().sendMessage((ITextComponent)new StringTextComponent("Server Status:"));
 	        event.getEntity().sendMessage((ITextComponent)new StringTextComponent("online-mode = " + server.isServerInOnlineMode()));
@@ -155,8 +158,7 @@ public class splan {
 	        } 
 	        sent = true;
 	      } 
-	    } catch (Error E2) {
-	    	//1.16
+	    } catch (Error E2) {//1.16
 	        if (event.getEntity() instanceof net.minecraft.entity.player.PlayerEntity&&!sent) {
 	          event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("Server Status: "),event.getEntity().getUniqueID());
 	          event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("online-mode = " + server.isServerInOnlineMode()),event.getEntity().getUniqueID());
@@ -205,12 +207,10 @@ public class splan {
     sent = false;
     server = (IntegratedServer)event.getServer();
     String worldrootdir = "";
-    try {
-    	//1.13-1.15
+    try {//1.13 - 1.15
     	worldrootdir = (Minecraft.getInstance()).gameDir + File.separator + "saves" + File.separator + server.getFolderName() + File.separator;
     } catch (Error E1) {
-		try {
-			//1.16
+		try {//1.16
 			Field f = MinecraftServer.class.getDeclaredField("field_71310_m");
 		    f.setAccessible(true);
 		    LevelSave ls=(LevelSave) f.get(server);
@@ -250,7 +250,7 @@ public class splan {
     ServerProperties.comment = "Minecraft Server Properties for LAN." + System.getProperty("line.separator") + "For default behaviour :-" + System.getProperty("line.separator") + "set max-view-distance=0" + System.getProperty("line.separator") + "set port=0" + System.getProperty("line.separator") + "You can also delete this(or any properties) file to get it regenerated with default values.";
     port = ServerProperties.getIntProperty("port", 0);
     server.setOnlineMode(ServerProperties.getBooleanProperty("online-mode", true));
-    try {//1.13-1.15
+    try {//1.13 - 1.15
     server.setCanSpawnAnimals(ServerProperties.getBooleanProperty("spawn-animals", true));
     server.setCanSpawnNPCs(ServerProperties.getBooleanProperty("spawn-npcs", true));
     } catch (Error E1){
@@ -259,16 +259,16 @@ public class splan {
     server.setAllowPvp(ServerProperties.getBooleanProperty("pvp", true));
     server.setAllowFlight(ServerProperties.getBooleanProperty("allow-flight", false));
     server.setResourcePack(ServerProperties.getStringProperty("resource-pack-sha1", ""), loadResourcePackSHA());
-    try {//1.13-1.15
+    try {//1.13 - 1.15
     server.setMOTD(ServerProperties.getStringProperty("motd", "<! " + server.getServerOwner() + "'s " + server.getWorldName() + " ON LAN !>"));
-    } catch (Error E1) {
+    } catch (Error E1) {//1.16
     	server.setMOTD(ServerProperties.getStringProperty("motd", "<! " + server.getServerOwner() + "'s " + server.func_71214_G() + " ON LAN !>"));
     }
     server.setPlayerIdleTimeout(ServerProperties.getIntProperty("player-idle-timeout", 0));
     server.setBuildLimit(ServerProperties.getIntProperty("max-build-height", 256));
     LOGGER.debug("Server Status:");
     LOGGER.debug("online-mode = " + server.isServerInOnlineMode());
-    try {//1.13-1.15
+    try {//1.13 - 1.15
     LOGGER.debug("spawn-animals = " + server.getCanSpawnAnimals());
     LOGGER.debug("spawn-npcs = " + server.getCanSpawnNPCs());
     } catch (Error E1) {
