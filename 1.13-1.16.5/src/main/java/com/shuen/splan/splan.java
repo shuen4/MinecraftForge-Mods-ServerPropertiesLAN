@@ -3,8 +3,8 @@ package com.shuen.splan;
 import com.google.common.io.Files;
 import com.mojang.brigadier.CommandDispatcher;
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.BindException;
 import java.net.InetAddress;
 import java.util.regex.Pattern;
 import net.minecraft.client.Minecraft;
@@ -27,7 +27,6 @@ import net.minecraft.command.impl.WhitelistCommand;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.util.HttpUtil;
 import net.minecraft.util.HTTPUtil;
 import net.minecraft.util.text.ITextComponent;
@@ -41,6 +40,7 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -60,6 +60,8 @@ public class splan {
   
   public static splan instance;
   
+  private boolean serverstarted = false;
+  
   public splan() {
     instance = this;
     MinecraftForge.EVENT_BUS.register(this);
@@ -67,11 +69,20 @@ public class splan {
   
   @SubscribeEvent
   public void test(EntityJoinWorldEvent event) {
+	if (!serverstarted)
+		return;
 	if (port<=0||port>65535)
 		try {//1.13
 		port = HttpUtil.getSuitableLanPort();
-		} catch (Error E1) {//1.14 - 1.16
+		} catch (Error E1) {
+			try {//1.14 - 1.16
 			port = HTTPUtil.func_76181_a();
+			} catch (Error E2) {
+				LOGGER.error("Error setting port to valid port:");
+				E1.printStackTrace();
+				LOGGER.error("Error 2:");
+				E2.printStackTrace();
+			}
 		}
     try {//1.13
       if (event.getEntity() instanceof net.minecraft.entity.player.EntityPlayer && !sent) {
@@ -95,7 +106,8 @@ public class splan {
         } else {
           event.getEntity().sendMessage((ITextComponent)new TextComponentString("max-view-distance = default"));
         } 
-        event.getEntity().sendMessage((ITextComponent)new TextComponentString("white-list = " + ServerProperties.getBooleanProperty("white-list", false)));
+        event.getEntity().sendMessage((ITextComponent)new TextComponentString("use /whitelist command control whitelist"));
+        event.getEntity().sendMessage((ITextComponent)new TextComponentString("^ require allow-cheat on"));
         try {
           server.getNetworkSystem().addEndpoint((InetAddress)null, port);
           LOGGER.info("Started serving on {}", Integer.valueOf(port));
@@ -110,9 +122,13 @@ public class splan {
           server.getPlayerList().setGameType(server.getGameType());
           server.getPlayerList().setCommandsAllowedForAll(false);
           event.getEntity().sendMessage((ITextComponent)new TextComponentTranslation("commands.publish.success", new Object[] { Integer.valueOf(port) }));
-        } catch (Exception e1) {
+        } catch (BindException e1) {
+          LOGGER.error("Error Bind port "+port+":");
           e1.printStackTrace();
-        } 
+        } catch (Exception e1) {
+          LOGGER.error("Unknown Error:");
+          e1.printStackTrace();
+        }
         sent = true;
       } 
     } catch (Error E1) {
@@ -137,8 +153,9 @@ public class splan {
 	          event.getEntity().sendMessage((ITextComponent)new StringTextComponent("max-view-distance = " + i));
 	        } else {
 	          event.getEntity().sendMessage((ITextComponent)new StringTextComponent("max-view-distance = default"));
-	        } 
-	        event.getEntity().sendMessage((ITextComponent)new StringTextComponent("white-list = " + ServerProperties.getBooleanProperty("white-list", false)));
+	        }
+	          event.getEntity().sendMessage((ITextComponent)new StringTextComponent("use /whitelist command control whitelist"));
+	          event.getEntity().sendMessage((ITextComponent)new StringTextComponent("^ require allow-cheat on"));
 	        try {
 	          server.getNetworkSystem().addEndpoint((InetAddress)null, port);
 	          LOGGER.info("Started serving on {}", Integer.valueOf(port));
@@ -153,57 +170,80 @@ public class splan {
 	          server.getPlayerList().setGameType(server.getGameType());
 	          server.getPlayerList().setCommandsAllowedForAll(false);
 	          event.getEntity().sendMessage((ITextComponent)new TranslationTextComponent("commands.publish.success", new Object[] { Integer.valueOf(port) }));
-	        } catch (Exception e1) {
+	        } catch (BindException e1) {
+	          LOGGER.error("Error Bind port "+port+":");
 	          e1.printStackTrace();
-	        } 
+	        } catch (Exception e1) {
+	          LOGGER.error("Unknow Error:");
+	          e1.printStackTrace();
+	        }
 	        sent = true;
 	      } 
-	    } catch (Error E2) {//1.16
-	        if (event.getEntity() instanceof net.minecraft.entity.player.PlayerEntity&&!sent) {
-	          event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("Server Status: "),event.getEntity().getUniqueID());
-	          event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("online-mode = " + server.isServerInOnlineMode()),event.getEntity().getUniqueID());
-	          event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("pvp = " + server.isPVPEnabled()),event.getEntity().getUniqueID());
-	          event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("allow-flight = " + server.isFlightAllowed()),event.getEntity().getUniqueID());
-	          event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("player-idle-timeout = " + server.getMaxPlayerIdleMinutes()),event.getEntity().getUniqueID());
-	          event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("max-build-height = " + server.getBuildLimit()),event.getEntity().getUniqueID());
-	          event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("motd = " + server.getMOTD()),event.getEntity().getUniqueID());
-	          event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("max-players = " + server.getMaxPlayers()),event.getEntity().getUniqueID());
-	          if (!server.getResourcePackUrl().isEmpty())
-	            event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("resource-pack = " + server.getResourcePackUrl()),event.getEntity().getUniqueID()); 
-	          if (!server.getResourcePackHash().isEmpty())
-	            event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("resource-pack-sha1 = " + server.getResourcePackHash()),event.getEntity().getUniqueID()); 
-	          int i = ServerProperties.getIntProperty("max-view-distance", 0);
-	          if (i > 0) {
-	            event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("max-view-distance = " + i),event.getEntity().getUniqueID());
-	          } else {
-	            event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("max-view-distance = default"),event.getEntity().getUniqueID());
-	          } 
-	          event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("white-list = " + ServerProperties.getBooleanProperty("white-list", false)),event.getEntity().getUniqueID());
-	          try {
-	            server.getNetworkSystem().addEndpoint((InetAddress)null, port);
-	            LOGGER.info("Started serving on {}", Integer.valueOf(port));
-	            Field field = IntegratedServer.class.getDeclaredField("field_195580_l");
-	            field.setAccessible(true);
-	            field.set(server, Integer.valueOf(port));
-	            field = IntegratedServer.class.getDeclaredField("field_71345_q");
-	            field.setAccessible(true);
-	            LanServerPingThread tlsp = new LanServerPingThread(server.getMOTD(), port + "");
-	            tlsp.start();
-	            field.set(server, tlsp);
-	            server.getPlayerList().setGameType(server.getGameType());
-	            server.getPlayerList().setCommandsAllowedForAll(false);
-	            event.getEntity().func_145747_a((ITextComponent)new TranslationTextComponent("commands.publish.success", new Object[] { Integer.valueOf(port) }),event.getEntity().getUniqueID());
-	          } catch (Exception e1) {
-	            e1.printStackTrace();
-	          } 
-	          sent = true;
-	        } 
-	    }
-    }
+	    } catch (Error E2) {
+		  try {//1.16
+		      if (event.getEntity() instanceof net.minecraft.entity.player.PlayerEntity&&!sent) {
+			  event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("Server Status: "),event.getEntity().getUniqueID());
+			  event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("online-mode = " + server.isServerInOnlineMode()),event.getEntity().getUniqueID());
+			  event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("pvp = " + server.isPVPEnabled()),event.getEntity().getUniqueID());
+			  event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("allow-flight = " + server.isFlightAllowed()),event.getEntity().getUniqueID());
+			  event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("player-idle-timeout = " + server.getMaxPlayerIdleMinutes()),event.getEntity().getUniqueID());
+			  event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("max-build-height = " + server.getBuildLimit()),event.getEntity().getUniqueID());
+			  event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("motd = " + server.getMOTD()),event.getEntity().getUniqueID());
+			  event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("max-players = " + server.getMaxPlayers()),event.getEntity().getUniqueID());
+			  if (!server.getResourcePackUrl().isEmpty())
+			    event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("resource-pack = " + server.getResourcePackUrl()),event.getEntity().getUniqueID()); 
+			  if (!server.getResourcePackHash().isEmpty())
+			    event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("resource-pack-sha1 = " + server.getResourcePackHash()),event.getEntity().getUniqueID()); 
+			  int i = ServerProperties.getIntProperty("max-view-distance", 0);
+			  if (i > 0) {
+			    event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("max-view-distance = " + i),event.getEntity().getUniqueID());
+			  } else {
+			    event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("max-view-distance = default"),event.getEntity().getUniqueID());
+			  } 
+			  event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("use /whitelist command control whitelist"),event.getEntity().getUniqueID());
+			  event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("^ require allow-cheat on"),event.getEntity().getUniqueID());
+			  try {
+			    server.getNetworkSystem().addEndpoint((InetAddress)null, port);
+			    LOGGER.info("Started serving on {}", Integer.valueOf(port));
+			    Field field = IntegratedServer.class.getDeclaredField("field_195580_l");
+			    field.setAccessible(true);
+			    field.set(server, Integer.valueOf(port));
+			    field = IntegratedServer.class.getDeclaredField("field_71345_q");
+			    field.setAccessible(true);
+			    LanServerPingThread tlsp = new LanServerPingThread(server.getMOTD(), port + "");
+			    tlsp.start();
+			    field.set(server, tlsp);
+			    server.getPlayerList().setGameType(server.getGameType());
+			    server.getPlayerList().setCommandsAllowedForAll(false);
+			    event.getEntity().func_145747_a((ITextComponent)new TranslationTextComponent("commands.publish.success", new Object[] { Integer.valueOf(port) }),event.getEntity().getUniqueID());
+		        } catch (BindException e1) {
+		          LOGGER.error("Error Bind port "+port+":");
+		          e1.printStackTrace();
+		        } catch (Exception e1) {
+		          LOGGER.error("Unknow Error:");
+		          e1.printStackTrace();
+		        }
+			  sent = true;
+			} 
+		    } catch (Error E3) {
+		    LOGGER.error("Error send message to player:");
+		  	E1.printStackTrace();
+		  	LOGGER.error("Error 2:");
+			E2.printStackTrace();
+			LOGGER.error("Error 3:");
+			E3.printStackTrace();
+		    }
+	     }
+      }
   }
   
   @SubscribeEvent
+  public void onServerStopped(FMLServerStoppedEvent event){
+	  serverstarted = false;
+  }
+  @SubscribeEvent
   public void onServerStarting(FMLServerStartingEvent event) {
+	serverstarted = true;
     sent = false;
     server = (IntegratedServer)event.getServer();
     String worldrootdir = "";
@@ -216,7 +256,9 @@ public class splan {
 		    LevelSave ls=(LevelSave) f.get(server);
 		    worldrootdir = ls.getWorldDir().toString() + File.separator;
 		} catch (Exception E2) {
+			LOGGER.error("Error get world directory:");
 			E1.printStackTrace();
+			LOGGER.error("Error 2:");
 			E2.printStackTrace();
 		}
 	}
@@ -239,7 +281,7 @@ public class splan {
         ServerProperties.comment += System.getProperty("line.separator") + "overrideGlobalDefaults :" + System.getProperty("line.separator") + "\tspecify weather to use this file to override the global settings in the file \"" + global.getAbsolutePath() + "\"";
         ServerProperties.getBooleanProperty("overrideGlobalDefaults", false);
         ServerProperties.saveProperties();
-      } catch (IOException e) {
+      } catch (Exception e) {
         LOGGER.warn("Could not create local server config file. Using the global one.");
         e.printStackTrace();
         ServerProperties = new PropertyManagerClient(global);
@@ -261,8 +303,15 @@ public class splan {
     server.setResourcePack(ServerProperties.getStringProperty("resource-pack-sha1", ""), loadResourcePackSHA());
     try {//1.13 - 1.15
     server.setMOTD(ServerProperties.getStringProperty("motd", "<! " + server.getServerOwner() + "'s " + server.getWorldName() + " ON LAN !>"));
-    } catch (Error E1) {//1.16
-    	server.setMOTD(ServerProperties.getStringProperty("motd", "<! " + server.getServerOwner() + "'s " + server.func_71214_G() + " ON LAN !>"));
+    } catch (Error E1) {
+    	try {//1.16
+          server.setMOTD(ServerProperties.getStringProperty("motd", "<! " + server.getServerOwner() + "'s " + server.func_71214_G() + " ON LAN !>"));
+	} catch (Error E2) {
+	  LOGGER.error("Error setting server MOTD:");
+	  E1.printStackTrace();
+	  LOGGER.error("Error 2:");
+ 	  E2.printStackTrace();
+	}
     }
     server.setPlayerIdleTimeout(ServerProperties.getIntProperty("player-idle-timeout", 0));
     server.setBuildLimit(ServerProperties.getIntProperty("max-build-height", 256));
@@ -295,23 +344,11 @@ public class splan {
       } else {
         LOGGER.debug("max-view-distance is set <= 0. Using default view distance algorithm.");
       } 
-      if (ServerProperties.getBooleanProperty("white-list", false)) {
-        UserListWhitelist whitelist;
-        LOGGER.warn("Whitelist enabled. Make sure to include your game ID in the file.");
-        File whitelistjson = new File(worldrootdir + "whitelist.json");
-        if (!whitelistjson.exists()) {
-          whitelistjson.createNewFile();
-          whitelist = new UserListWhitelist(whitelistjson);
-          whitelist.writeChanges();
-        } else {
-          whitelist = new UserListWhitelist(whitelistjson);
-        } 
-        field = PlayerList.class.getDeclaredField("field_72411_j");
-        field.setAccessible(true);
-        field.set(customPlayerList, whitelist);
-        customPlayerList.setWhiteListEnabled(true);
-      } 
       server.setPlayerList(customPlayerList);
+      } catch (Exception E1) {
+    	LOGGER.error("Unknown Error:");
+    	E1.printStackTrace();
+      }
       CommandDispatcher<CommandSource> dispatcher = server.getCommandManager().getDispatcher();
       BanIpCommand.register(dispatcher);
       BanListCommand.register(dispatcher);
@@ -326,9 +363,6 @@ public class splan {
       SetIdleTimeoutCommand.register(dispatcher);
       StopCommand.register(dispatcher);
       WhitelistCommand.register(dispatcher);
-    } catch (Exception e) {
-      e.printStackTrace();
-    } 
     if (firstRun)
       try {
         Files.copy(global, local);
@@ -336,7 +370,7 @@ public class splan {
         ServerProperties.comment += System.getProperty("line.separator") + "overrideGlobalDefaults :" + System.getProperty("line.separator") + "\tspecify weather to use this file to override the global settings in the file \"" + global.getAbsolutePath() + "\"";
         ServerProperties.getBooleanProperty("overrideGlobalDefaults", false);
         ServerProperties.saveProperties();
-      } catch (IOException e) {
+      } catch (Exception e) {
         LOGGER.error("Oops..! Couldn't copy to local server config file. Please manually copy the global server config file to your world save directory.");
         e.printStackTrace();
       }  
