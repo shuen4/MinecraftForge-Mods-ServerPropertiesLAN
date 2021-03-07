@@ -1,11 +1,11 @@
 license="MIT License"
-modLoader="javafml" #mandatory
+modLoader="javafml"
 loaderVersion="[25,)"
 [[mods]]
-modId="splan" #mandatory
-version="2.67" #mandatory
+modId="splan"
+version="2.67"
 displayName="Server Properties for LAN"
-displayURL="https://minecraft.curseforge.com/projects/server-properties-for-lan" #optional
+displayURL="https://minecraft.curseforge.com/projects/server-properties-for-lan"
 logoFile="logo.png"
 authors="Jaideep Singh Heer,sotzaii_shuen"
 description='''
