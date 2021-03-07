@@ -13,6 +13,6 @@ Tested(basic) usable on:
 + Fix client with mod join server will make it unplayable
 + Tested(basic) Forge 1.16.5-36.0.14
 
-2.67a
+2.67
 + Tested(basic) Forge 1.16.5-36.0.44
 + Will not open server port on world join
