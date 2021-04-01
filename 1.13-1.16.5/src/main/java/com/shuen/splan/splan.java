@@ -79,6 +79,8 @@ public class splan {
 					event.getEntity().sendMessage((ITextComponent)new TextComponentString("max-view-distance = default"));
 				if (port>0&&port<=65535)
 					event.getEntity().sendMessage((ITextComponent)new TextComponentString("port = " + port));
+				else
+					event.getEntity().sendMessage((ITextComponent)new TextComponentString("port = random"));
 				event.getEntity().sendMessage((ITextComponent)new TextComponentString("use /whitelist command control whitelist"));
 				event.getEntity().sendMessage((ITextComponent)new TextComponentString("^ require allow-cheat on"));
 				sent = true;
@@ -107,6 +109,8 @@ public class splan {
 					event.getEntity().sendMessage((ITextComponent)new StringTextComponent("max-view-distance = default"));
 				if (port>0&&port<=65535)
 					 event.getEntity().sendMessage((ITextComponent)new StringTextComponent("port = " + port));
+				else
+					 event.getEntity().sendMessage((ITextComponent)new StringTextComponent("port = random"));
 				event.getEntity().sendMessage((ITextComponent)new StringTextComponent("use /whitelist command control whitelist"));
 				event.getEntity().sendMessage((ITextComponent)new StringTextComponent("^ require allow-cheat on"));
 				sent = true;
@@ -133,6 +137,8 @@ public class splan {
 							event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("max-view-distance = default"),event.getEntity().getUniqueID());
 						if (port>0&&port<=65535)
 							event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("port = " + port),event.getEntity().getUniqueID());
+						else
+							event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("port = random"),event.getEntity().getUniqueID());
 						event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("use /whitelist command control whitelist"),event.getEntity().getUniqueID());
 						event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("^ require allow-cheat on"),event.getEntity().getUniqueID());
 						sent = true;
