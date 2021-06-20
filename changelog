@@ -1,9 +1,4 @@
 2.66 - Initialize version for mc1.13+
-Tested(basic) usable on:
-+ Forge 1.13.2-25.0.219
-+ Forge 1.14.4-28.1.0
-+ Forge 1.15.2-31.2.0
-+ Forge 1.16.5-36.0.13
 
 2.66a
 + Fix LAN port text to actual port instead of port 0
@@ -11,11 +6,21 @@ Tested(basic) usable on:
 2.66b
 + Fix Whitelist not working (move to /whitelist command #require allow-cheat on)
 + Fix client with mod join server will make it unplayable
-+ Tested(basic) Forge 1.16.5-36.0.14
 
 2.67
-+ Tested(basic) Forge 1.16.5-36.0.44
-+ Will not open server port on world join
++ Will not open server port on player join
 
-Commit d3a88b63185c564edbedb734cf1d321919cf5762 & a00360b1341f2a2e6d1c465ead0dc738ba1c10cc & 537a4ceae757516ce2767bfe38164a67c471361d
+2.67a
 + Optimize text display
++ Add code comments
++ Disable if mod is running on forge server
+
+Tested version:
++ Forge 1.13.2-25.0.219
++ Forge 1.14.4-28.1.0
++ Forge 1.15.2-31.2.0
++ Forge 1.16.5-36.0.13
++ Forge 1.16.5-36.0.14
++ Forge 1.16.5-36.0.44
++ Forge 1.16.5-36.1.0
++ Forge 1.16.5-36.1.31
