@@ -33,10 +33,10 @@ function initializeCoreMod() {
                             {
 				var instruction2 = instruction.getPrevious();
 				if (instruction2.getOpcode() === Opcodes.ICONST_0)
-					{
-						code.remove(instruction2);
-						code.insertBefore(instruction,new MethodInsnNode(Opcodes.INVOKESTATIC, asmHandler, asmMethodName, asmMethodDesc, false));
-					}
+				{
+					code.remove(instruction2);
+					code.insertBefore(instruction,new MethodInsnNode(Opcodes.INVOKESTATIC, asmHandler, asmMethodName, asmMethodDesc, false));
+				}
         			break;
                             }
                         }
