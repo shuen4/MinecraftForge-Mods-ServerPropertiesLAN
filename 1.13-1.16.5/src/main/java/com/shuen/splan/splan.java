@@ -3,7 +3,9 @@ package com.shuen.splan;
 import com.google.common.io.Files;
 import com.mojang.brigadier.CommandDispatcher;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.ServerSocket;
 import java.util.regex.Pattern;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandSource;
@@ -38,20 +40,33 @@ import org.apache.logging.log4j.Logger;
 
 @Mod("splan")
 public class splan {
+	/** server port */
 	private static int port = 0;
 	private static boolean firstRun = false;
+	/** Property manager */
 	private PropertyManagerClient ServerProperties = null;
+	/** Log4j logger */
 	private static final Logger LOGGER = LogManager.getLogger();
+	/** Global variable */
 	private IntegratedServer server;
+	/** Only first player joined game send server info */
 	private boolean sent = false;
+	/** Prevent send message to player if joined server not IntegratedServer by this client */
 	private boolean serverstarted = false;
-	public static splan instance;
-
+	/** null if server running this mod */
+	public static splan instance = null;
+	/** mod initialization */
 	public splan() {
+		try {
+			Minecraft.getInstance();
+		} catch (RuntimeException e) {
+			LOGGER.error("Refuse to work on server");
+			return;
+		}
 		instance = this;
 		MinecraftForge.EVENT_BUS.register(this);
 	}
-
+	/** Send server status to first player joined game */
 	@SubscribeEvent
 	public void SendMessageToPlayer(EntityJoinWorldEvent event) {
 		if (!serverstarted)
@@ -77,7 +92,7 @@ public class splan {
 					event.getEntity().sendMessage((ITextComponent)new TextComponentString("max-view-distance = " + i));
 				else
 					event.getEntity().sendMessage((ITextComponent)new TextComponentString("max-view-distance = default"));
-				if (port>0&&port<=65535)
+				if (port>0 && port<=65535)
 					event.getEntity().sendMessage((ITextComponent)new TextComponentString("port = " + port));
 				else
 					event.getEntity().sendMessage((ITextComponent)new TextComponentString("port = random"));
@@ -107,7 +122,7 @@ public class splan {
 					event.getEntity().sendMessage((ITextComponent)new StringTextComponent("max-view-distance = " + i));
 				else
 					event.getEntity().sendMessage((ITextComponent)new StringTextComponent("max-view-distance = default"));
-				if (port>0&&port<=65535)
+				if (port>0 && port<=65535)
 					 event.getEntity().sendMessage((ITextComponent)new StringTextComponent("port = " + port));
 				else
 					 event.getEntity().sendMessage((ITextComponent)new StringTextComponent("port = random"));
@@ -135,7 +150,7 @@ public class splan {
 							event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("max-view-distance = " + i),event.getEntity().getUniqueID());
 						else
 							event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("max-view-distance = default"),event.getEntity().getUniqueID());
-						if (port>0&&port<=65535)
+						if (port>0 && port<=65535)
 							event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("port = " + port),event.getEntity().getUniqueID());
 						else
 							event.getEntity().func_145747_a((ITextComponent)new StringTextComponent("port = random"),event.getEntity().getUniqueID());
@@ -144,6 +159,7 @@ public class splan {
 						sent = true;
 					}
 				} catch (Error E3) {
+					/** Something went wrong */
 					LOGGER.error("Error send message to player:");
 					E1.printStackTrace();
 					LOGGER.error("Error 2:");
@@ -154,27 +170,34 @@ public class splan {
 			}
 		}
 	}
-	
+	/** reset */
 	@SubscribeEvent
 	public void onServerStopped(FMLServerStoppedEvent event){
+		port = 0;
+		firstRun = false;
+		ServerProperties = null;
+		server = null;
+		sent = false;
 		serverstarted = false;
 	}
 	
 	@SubscribeEvent
 	public void onServerStarting(FMLServerStartingEvent event) {
 		serverstarted = true;
-		sent = false;
 		server = (IntegratedServer)event.getServer();
 		String worldrootdir = "";
 		try {//1.13 - 1.15
+			/** half hardcoded */
 			worldrootdir = (Minecraft.getInstance()).gameDir + File.separator + "saves" + File.separator + server.getFolderName() + File.separator;
 		} catch (Error E1) {
 			try {//1.16
+				/** server.levelsave.getWorldDir().toString() = world directory full path */
 				Field f = MinecraftServer.class.getDeclaredField("field_71310_m");
 				f.setAccessible(true);
 				LevelSave ls=(LevelSave) f.get(server);
 				worldrootdir = ls.getWorldDir().toString() + File.separator;
 			} catch (Exception E2) {
+				/** Something went wrong */
 				LOGGER.error("Error get world directory:");
 				E1.printStackTrace();
 				LOGGER.error("Error 2:");
@@ -185,30 +208,45 @@ public class splan {
 		File global = new File((Minecraft.getInstance()).gameDir + File.separator + "config" + File.separator + "serverGlobalConfig.properties");
 		LOGGER.debug("Integrated Server Starting");
 		if (!global.exists()) {
+			/** create new file */
 			firstRun = true;
 			ServerProperties = new PropertyManagerClient(global);
 		} else if (local.exists()) {
+			/** load file */
 			ServerProperties = new PropertyManagerClient(local);
 			if (!ServerProperties.getBooleanProperty("overrideGlobalDefaults", true)) {
+				/** use global */
 				ServerProperties.setPropertiesFile(global);
 				LOGGER.debug("Using Global Server Properties !");
 			}
 		} else {
 			try {
+				/** copy global file to world directory*/
 				Files.copy(global, local);
 				ServerProperties = new PropertyManagerClient(local);
-				ServerProperties.comment += System.getProperty("line.separator") + "overrideGlobalDefaults :" + System.getProperty("line.separator") + "\tspecify weather to use this file to override the global settings in the file \"" + global.getAbsolutePath() + "\"";
-				ServerProperties.getBooleanProperty("overrideGlobalDefaults", false);
+				ServerProperties.comment += System.getProperty("line.separator") 
+										  + "overrideGlobalDefaults :" + System.getProperty("line.separator") 
+										  + "\tspecify weather to use this file to override the global settings in the file \"" 
+										  + global.getAbsolutePath() + "\"";
+				/** Generate property "overrideGlobalDefaults" */
+				ServerProperties.getBooleanProperty("overrideGlobalDefaults", true);
 				ServerProperties.saveProperties();
 			} catch (Exception e) {
+				/** Something went wrong */
 				LOGGER.warn("Could not create local server config file. Using the global one.");
 				e.printStackTrace();
+				/** use global file */
 				ServerProperties = new PropertyManagerClient(global);
 			}
 		}
 		LOGGER.info("Using file : " + (ServerProperties.getBooleanProperty("overrideGlobalDefaults", true) ? local.getPath() : global.getPath()));
 		server = (IntegratedServer)event.getServer();
-		ServerProperties.comment = "Minecraft Server Properties for LAN." + System.getProperty("line.separator") + "For default behaviour :-" + System.getProperty("line.separator") + "set max-view-distance=0" + System.getProperty("line.separator") + "set port=0" + System.getProperty("line.separator") + "You can also delete this(or any properties) file to get it regenerated with default values.";
+		ServerProperties.comment = "Minecraft Server Properties for LAN." + System.getProperty("line.separator") 
+								 + "For default behaviour :-" + System.getProperty("line.separator") 
+								 + "set max-view-distance=0" + System.getProperty("line.separator") 
+								 + "set port=0" + System.getProperty("line.separator") 
+								 + "You can also delete this(or any properties) file to get it regenerated with default values.";
+		/** process data */
 		port = ServerProperties.getIntProperty("port", 0);
 		server.setOnlineMode(ServerProperties.getBooleanProperty("online-mode", true));
 		try {//1.13 - 1.15
@@ -224,6 +262,7 @@ public class splan {
 			try {//1.16
 				server.setMOTD(ServerProperties.getStringProperty("motd", "<! " + server.getServerOwner() + "'s " + server.func_71214_G() + " ON LAN !>"));
 			} catch (Error E2) {
+				/** Something went wrong */
 				LOGGER.error("Error setting server MOTD:");
 				E1.printStackTrace();
 				LOGGER.error("Error 2:");
@@ -232,6 +271,7 @@ public class splan {
 		}
 		server.setPlayerIdleTimeout(ServerProperties.getIntProperty("player-idle-timeout", 0));
 		server.setBuildLimit(ServerProperties.getIntProperty("max-build-height", 256));
+		/** Debug info */
 		LOGGER.debug("Server Status:");
 		LOGGER.debug("online-mode = " + server.isServerInOnlineMode());
 		try {//1.13 - 1.15
@@ -244,12 +284,15 @@ public class splan {
 		LOGGER.debug("max-build-height = " + server.getBuildLimit());
 		LOGGER.debug("resource-pack-sha1 = " + server.getResourcePackHash());
 		LOGGER.debug("motd = " + server.getMOTD());
+		/** Process special data */
 		PlayerList customPlayerList = server.getPlayerList();
 		try {
+			/** Max Players */
 			Field field = PlayerList.class.getDeclaredField("field_72405_c");
 			field.setAccessible(true);
 			field.set(customPlayerList, Integer.valueOf(ServerProperties.getIntProperty("max-players", 10)));
 			LOGGER.debug("Max Players = " + customPlayerList.getMaxPlayers());
+			/** view distance */
 			Field dist = PlayerList.class.getDeclaredField("field_72402_d");
 			dist.setAccessible(true);
 			int d = ServerProperties.getIntProperty("max-view-distance", 0);
@@ -260,9 +303,11 @@ public class splan {
 				LOGGER.debug("max-view-distance is set <= 0. Using default view distance algorithm.");
 			server.setPlayerList(customPlayerList);
 		} catch (Exception E1) {
+			/** Something went wrong */
 			LOGGER.error("Unknown Error:");
 			E1.printStackTrace();
 		}
+		/** useful command*/
 		CommandDispatcher<CommandSource> dispatcher = server.getCommandManager().getDispatcher();
 		BanIpCommand.register(dispatcher);
 		BanListCommand.register(dispatcher);
@@ -279,17 +324,23 @@ public class splan {
 		WhitelistCommand.register(dispatcher);
 		if (firstRun)
 			try {
+				/** copy global file to world directory */
 				Files.copy(global, local);
 				ServerProperties.setPropertiesFile(local);
-				ServerProperties.comment += System.getProperty("line.separator") + "overrideGlobalDefaults :" + System.getProperty("line.separator") + "\tspecify weather to use this file to override the global settings in the file \"" + global.getAbsolutePath() + "\"";
-				ServerProperties.getBooleanProperty("overrideGlobalDefaults", false);
+				ServerProperties.comment += System.getProperty("line.separator") 
+										  + "overrideGlobalDefaults :" + System.getProperty("line.separator") 
+										  + "\tspecify weather to use this file to override the global settings in the file \"" 
+										  + global.getAbsolutePath() + "\"";
+				/** Generate property "overrideGlobalDefaults" */
+				ServerProperties.getBooleanProperty("overrideGlobalDefaults", true);
 				ServerProperties.saveProperties();
 			} catch (Exception e) {
+				/** Something went wrong */
 				LOGGER.error("Oops..! Couldn't copy to local server config file. Please manually copy the global server config file to your world save directory.");
 				e.printStackTrace();
 			}
 	}
-	
+	/** copied from net.minecraft.server.dedicated.DedicatedServer#loadResourcePackSHA */
 	private String loadResourcePackSHA() {
 		if (ServerProperties.hasProperty("resource-pack-hash"))
 			if (ServerProperties.hasProperty("resource-pack-sha1")) {
@@ -306,8 +357,18 @@ public class splan {
 			LOGGER.warn("You specified a resource pack without providing a sha1 hash. Pack will be updated on the client only if you change the name of the pack."); 
 		return s;
 	}
-	
+	/** ASM Handler */
 	public static int getPort() {
-		return port>0&&port<=65535?port:0;
+		/** if not server running mod and port is valid */
+		if (instance != null && port > 0 && port <= 65535)
+			return port;
+		/** if server running mod or port is invalid*/
+		else
+			/** act like normal client */
+			try (ServerSocket serversocket = new ServerSocket(0)){
+				return serversocket.getLocalPort();
+			} catch (IOException e) {
+				return 25564;
+			}
 	}
 }
