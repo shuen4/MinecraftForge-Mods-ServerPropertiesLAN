@@ -28,3 +28,6 @@ Tested version:
 + Forge 1.17.1-37.0.10
 + Forge 1.17.1-37.0.33
 + Forge 1.17.1-37.0.34
++ Forge 1.17.1-37.0.70
++ Forge 1.17.1-37.0.86 (delete META-INF\MANIFEST.MF in 1.17 mod jar file)
++ Forge 1.17.1-37.0.87 (same above)
