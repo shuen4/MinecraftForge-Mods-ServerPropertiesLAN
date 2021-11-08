@@ -16,7 +16,7 @@
 + Disable if mod is running on forge server
 
 2.67b
-+ fix issue #1
++ fix issue #1 (tested only Forge 1.17.1-37.0.104)
 
 Tested version:
 + Forge 1.13.2-25.0.219
