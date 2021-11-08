@@ -255,7 +255,7 @@ public class splan {
 		} catch (Error E1){}
 		server.setAllowPvp(ServerProperties.getBooleanProperty("pvp", true));
 		server.setAllowFlight(ServerProperties.getBooleanProperty("allow-flight", false));
-		server.setResourcePack(ServerProperties.getStringProperty("resource-pack-sha1", ""), loadResourcePackSHA());
+		server.setResourcePack(ServerProperties.getStringProperty("resource-pack", ""), loadResourcePackSHA());
 		try {//1.13 - 1.15
 			server.setMOTD(ServerProperties.getStringProperty("motd", "<! " + server.getServerOwner() + "'s " + server.getWorldName() + " ON LAN !>"));
 		} catch (Error E1) {
