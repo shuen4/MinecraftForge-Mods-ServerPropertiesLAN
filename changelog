@@ -15,6 +15,9 @@
 + Add code comments
 + Disable if mod is running on forge server
 
+2.67b
++ fix issue #1
+
 Tested version:
 + Forge 1.13.2-25.0.219
 + Forge 1.14.4-28.1.0
