@@ -172,7 +172,7 @@ public class splan {
 		server.setUsesAuthentication(ServerProperties.getBooleanProperty("online-mode", true));
 		server.setPvpAllowed(ServerProperties.getBooleanProperty("pvp", true));
 		server.setFlightAllowed(ServerProperties.getBooleanProperty("allow-flight", false));
-		server.setResourcePack(ServerProperties.getStringProperty("resource-pack-sha1", ""), loadResourcePackSHA());
+		server.setResourcePack(ServerProperties.getStringProperty("resource-pack", ""), loadResourcePackSHA());
 		server.setMotd(ServerProperties.getStringProperty("motd", "<! " + server.getSingleplayerName() + "'s " + server.getWorldData().getLevelName() + " ON LAN !>"));
 		server.setPlayerIdleTimeout(ServerProperties.getIntProperty("player-idle-timeout", 0));
 		/** Debug info */
