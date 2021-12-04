@@ -18,7 +18,7 @@
 2.67b
 + fix issue #1 (tested only Forge 1.17.1-37.0.104)
 
-Tested version:
+basic tested:
 + Forge 1.13.2-25.0.219
 + Forge 1.14.4-28.1.0
 + Forge 1.15.2-31.2.0
@@ -35,3 +35,5 @@ Tested version:
 + Forge 1.17.1-37.0.86 (delete META-INF\MANIFEST.MF in 1.17 mod jar file)
 + Forge 1.17.1-37.0.87 (same above)
 + Forge 1.17.1-37.0.90
++ Forge 1.17.1-37.1.0
++ Forge 1.18-38.0.14
