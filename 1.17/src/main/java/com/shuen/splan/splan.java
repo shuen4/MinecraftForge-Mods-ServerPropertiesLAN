@@ -122,10 +122,10 @@ public class splan {
 			ls = (LevelStorageAccess) f.get(server);
 			worldrootdir = ls.getWorldDir().toString() + File.separator;
 		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		File local = new File(worldrootdir + "server.properties");
+		@SuppressWarnings("resource")
 		File global = new File((Minecraft.getInstance()).gameDirectory + File.separator + "config" + File.separator + "serverGlobalConfig.properties");
 		LOGGER.debug("Integrated Server Starting");
 		if (!global.exists()) {

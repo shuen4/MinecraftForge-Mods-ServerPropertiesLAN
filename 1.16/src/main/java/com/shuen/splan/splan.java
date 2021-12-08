@@ -1,41 +1,37 @@
 package com.shuen.splan;
 
 import com.google.common.io.Files;
+import com.mojang.brigadier.CommandDispatcher;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.util.regex.Pattern;
-
-import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.commands.BanPlayerCommands;
-import net.minecraft.server.commands.BanIpCommands;
-import net.minecraft.server.commands.BanListCommands;
-import net.minecraft.server.commands.DeOpCommands;
-import net.minecraft.server.commands.OpCommand;
-import net.minecraft.server.commands.PardonCommand;
-import net.minecraft.server.commands.PardonIpCommand;
-import net.minecraft.server.commands.SaveAllCommand;
-import net.minecraft.server.commands.SaveOffCommand;
-import net.minecraft.server.commands.SaveOnCommand;
-import net.minecraft.server.commands.SetPlayerIdleTimeoutCommand;
-import net.minecraft.server.commands.StopCommand;
-import net.minecraft.server.commands.WhitelistCommand;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.client.server.IntegratedServer;
-import net.minecraft.server.players.PlayerList;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.world.level.storage.LevelStorageSource.LevelStorageAccess;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.impl.BanCommand;
+import net.minecraft.command.impl.BanIpCommand;
+import net.minecraft.command.impl.BanListCommand;
+import net.minecraft.command.impl.DeOpCommand;
+import net.minecraft.command.impl.OpCommand;
+import net.minecraft.command.impl.PardonCommand;
+import net.minecraft.command.impl.PardonIpCommand;
+import net.minecraft.command.impl.SaveAllCommand;
+import net.minecraft.command.impl.SaveOffCommand;
+import net.minecraft.command.impl.SaveOnCommand;
+import net.minecraft.command.impl.SetIdleTimeoutCommand;
+import net.minecraft.command.impl.StopCommand;
+import net.minecraft.command.impl.WhitelistCommand;
+import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,7 +43,7 @@ public class splan {
 	/** Property manager */
 	private PropertyManagerClient ServerProperties = null;
 	/** Log4j logger */
-	public static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LogManager.getLogger();
 	/** Global variable */
 	private IntegratedServer server;
 	/** Only first player joined game send server info */
@@ -72,35 +68,36 @@ public class splan {
 	public void SendMessageToPlayer(EntityJoinWorldEvent event) {
 		if (!serverstarted)
 			return;
-		if (event.getEntity() instanceof Player&&!sent) {
-			event.getEntity().sendMessage((Component)new TextComponent("Server Status: "),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("online-mode = " + server.usesAuthentication()),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("pvp = " + server.isPvpAllowed()),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("allow-flight = " + server.isFlightAllowed()),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("player-idle-timeout = " + server.getPlayerIdleTimeout()),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("motd = " + server.getMotd()),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("max-players = " + server.getMaxPlayers()),event.getEntity().getUUID());
+		if (event.getEntity() instanceof net.minecraft.entity.player.PlayerEntity&&!sent) {
+			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("Server Status: "),event.getEntity().getUUID());
+			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("online-mode = " + server.usesAuthentication()),event.getEntity().getUUID());
+			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("pvp = " + server.isPvpAllowed()),event.getEntity().getUUID());
+			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("allow-flight = " + server.isFlightAllowed()),event.getEntity().getUUID());
+			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("player-idle-timeout = " + server.getPlayerIdleTimeout()),event.getEntity().getUUID());
+			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("max-build-height = " + server.getMaxBuildHeight()),event.getEntity().getUUID());
+			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("motd = " + server.getMotd()),event.getEntity().getUUID());
+			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("max-players = " + server.getMaxPlayers()),event.getEntity().getUUID());
 			if (!server.getResourcePack().isEmpty())
-				event.getEntity().sendMessage((Component)new TextComponent("resource-pack = " + server.getResourcePack()),event.getEntity().getUUID()); 
+				event.getEntity().sendMessage((ITextComponent)new StringTextComponent("resource-pack = " + server.getResourcePack()),event.getEntity().getUUID()); 
 			if (!server.getResourcePackHash().isEmpty())
-				event.getEntity().sendMessage((Component)new TextComponent("resource-pack-sha1 = " + server.getResourcePackHash()),event.getEntity().getUUID()); 
+				event.getEntity().sendMessage((ITextComponent)new StringTextComponent("resource-pack-sha1 = " + server.getResourcePackHash()),event.getEntity().getUUID()); 
 			int i = ServerProperties.getIntProperty("max-view-distance", 0);
 			if (i > 0)
-				event.getEntity().sendMessage((Component)new TextComponent("max-view-distance = " + i),event.getEntity().getUUID());
+				event.getEntity().sendMessage((ITextComponent)new StringTextComponent("max-view-distance = " + i),event.getEntity().getUUID());
 			else
-				event.getEntity().sendMessage((Component)new TextComponent("max-view-distance = default"),event.getEntity().getUUID());
+				event.getEntity().sendMessage((ITextComponent)new StringTextComponent("max-view-distance = default"),event.getEntity().getUUID());
 			if (port>0 && port<=65535)
-				event.getEntity().sendMessage((Component)new TextComponent("port = " + port),event.getEntity().getUUID());
+				event.getEntity().sendMessage((ITextComponent)new StringTextComponent("port = " + port),event.getEntity().getUUID());
 			else
-				event.getEntity().sendMessage((Component)new TextComponent("port = random"),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("use /whitelist command control whitelist"),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("^ require allow-cheat on"),event.getEntity().getUUID());
+				event.getEntity().sendMessage((ITextComponent)new StringTextComponent("port = random"),event.getEntity().getUUID());
+			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("use /whitelist command control whitelist"),event.getEntity().getUUID());
+			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("^ require allow-cheat on"),event.getEntity().getUUID());
 			sent = true;
 		}
 	}
 	/** reset */
 	@SubscribeEvent
-	public void onServerStopped(ServerStoppedEvent event){
+	public void onServerStopped(FMLServerStoppedEvent event){
 		port = 0;
 		firstRun = false;
 		ServerProperties = null;
@@ -110,20 +107,12 @@ public class splan {
 	}
 	
 	@SubscribeEvent
-	public void onServerStarting(ServerStartingEvent event) {
+	public void onServerStarting(FMLServerStartingEvent event) {
 		serverstarted = true;
 		server = (IntegratedServer)event.getServer();
-		String worldrootdir = "";
-		/** server.levelsave.getWorldDir().toString() = world directory full path */
-		Field f;
-		LevelStorageAccess ls;
-		try {
-			f = getField(MinecraftServer.class,"f_129744_","storageSource");
-			ls = (LevelStorageAccess) f.get(server);
-			worldrootdir = ls.getWorldDir().toString() + File.separator;
-		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e1) {
-			e1.printStackTrace();
-		}
+		/** half hardcoded */
+		@SuppressWarnings("resource")
+		String worldrootdir = (Minecraft.getInstance()).gameDirectory + File.separator + "saves" + File.separator + server.getServerDirectory() + File.separator;
 		File local = new File(worldrootdir + "server.properties");
 		@SuppressWarnings("resource")
 		File global = new File((Minecraft.getInstance()).gameDirectory + File.separator + "config" + File.separator + "serverGlobalConfig.properties");
@@ -173,31 +162,36 @@ public class splan {
 		server.setPvpAllowed(ServerProperties.getBooleanProperty("pvp", true));
 		server.setFlightAllowed(ServerProperties.getBooleanProperty("allow-flight", false));
 		server.setResourcePack(ServerProperties.getStringProperty("resource-pack", ""), loadResourcePackSHA());
-		server.setMotd(ServerProperties.getStringProperty("motd", "<! " + server.getSingleplayerName() + "'s " + server.getWorldData().getLevelName() + " ON LAN !>"));
+		server.setMotd(ServerProperties.getStringProperty("motd", "<! " + server.getSingleplayerName() + "'s " + server.getServerDirectory() + " ON LAN !>"));
 		server.setPlayerIdleTimeout(ServerProperties.getIntProperty("player-idle-timeout", 0));
+		server.setMaxBuildHeight(ServerProperties.getIntProperty("max-build-height", 256));
 		/** Debug info */
 		LOGGER.debug("Server Status:");
 		LOGGER.debug("online-mode = " + server.usesAuthentication());
 		LOGGER.debug("pvp = " + server.isPvpAllowed());
 		LOGGER.debug("allow-flight = " + server.isFlightAllowed());
 		LOGGER.debug("player-idle-timeout = " + server.getPlayerIdleTimeout());
+		LOGGER.debug("max-build-height = " + server.getMaxBuildHeight());
+		LOGGER.debug("resource-pack = " + server.getResourcePack());
 		LOGGER.debug("resource-pack-sha1 = " + server.getResourcePackHash());
 		LOGGER.debug("motd = " + server.getMotd());
 		/** Process special data */
 		PlayerList customPlayerList = server.getPlayerList();
 		try {
+			/** Max Players */
+			Field field = PlayerList.class.getDeclaredField("field_72405_c");
+			field.setAccessible(true);
+			field.set(customPlayerList, Integer.valueOf(ServerProperties.getIntProperty("max-players", 10)));
+			LOGGER.debug("Max Players = " + customPlayerList.getMaxPlayers());
 			/** view distance */
+			Field dist = PlayerList.class.getDeclaredField("field_72402_d");
+			dist.setAccessible(true);
 			int d = ServerProperties.getIntProperty("max-view-distance", 0);
 			if (d > 0) {
-				customPlayerList.setViewDistance(d);
+				dist.set(customPlayerList, Integer.valueOf(d));
 				LOGGER.debug("Max view distance = " + d);
 			} else
 				LOGGER.debug("max-view-distance is set <= 0. Using default view distance algorithm.");
-			server.setPlayerList(customPlayerList);
-			/** Max Players */
-			Field field = getField(PlayerList.class,"f_11193_","maxPlayers");
-			field.set(customPlayerList, Integer.valueOf(ServerProperties.getIntProperty("max-players", 10)));
-			LOGGER.debug("Max Players = " + customPlayerList.getMaxPlayers());
 			server.setPlayerList(customPlayerList);
 		} catch (Exception E1) {
 			/** Something went wrong */
@@ -205,18 +199,18 @@ public class splan {
 			E1.printStackTrace();
 		}
 		/** useful command*/
-		CommandDispatcher<CommandSourceStack> dispatcher = server.getCommands().getDispatcher();
-		BanIpCommands.register(dispatcher);
-		BanListCommands.register(dispatcher);
-		BanPlayerCommands.register(dispatcher);
-		DeOpCommands.register(dispatcher);
+		CommandDispatcher<CommandSource> dispatcher = server.getCommands().getDispatcher();
+		BanIpCommand.register(dispatcher);
+		BanListCommand.register(dispatcher);
+		BanCommand.register(dispatcher);
+		DeOpCommand.register(dispatcher);
 		OpCommand.register(dispatcher);
 		PardonCommand.register(dispatcher);
 		PardonIpCommand.register(dispatcher);
 		SaveAllCommand.register(dispatcher);
 		SaveOffCommand.register(dispatcher);
 		SaveOnCommand.register(dispatcher);
-		SetPlayerIdleTimeoutCommand.register(dispatcher);
+		SetIdleTimeoutCommand.register(dispatcher);
 		StopCommand.register(dispatcher);
 		WhitelistCommand.register(dispatcher);
 		if (firstRun)
@@ -267,16 +261,5 @@ public class splan {
 			} catch (IOException e) {
 				return 25564;
 			}
-	}
-	private static Field getField(Class<?> c,String... fn) throws NoSuchFieldException {
-		for (String s:fn) {
-			try {
-				Field f;
-				f = c.getDeclaredField(s);
-				f.setAccessible(true);
-				return f;
-			} catch (NoSuchFieldException | SecurityException e) {}
-		}
-		throw new NoSuchFieldException();
 	}
 }

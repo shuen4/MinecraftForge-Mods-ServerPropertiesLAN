@@ -1,0 +1,8 @@
+!... A MINECRAFT MOD TO GENERATE A server.properties FILE FOR EACH LOCAL WORLD ...!
+
+For 1.12.2 or lower https://minecraft.curseforge.com/projects/server-properties-for-lan
+For 1.13 or higher https://github.com/shuen4/MinecraftForge-Mods-ServerPropertiesLAN/releases/
+
+Note:
++ Only server host need install this mod (other players is not required but still can install this mod)
++ This mod will not work on forge server

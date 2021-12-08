@@ -1,6 +1,6 @@
 license="MIT License"
 modLoader="javafml"
-loaderVersion="[37,)"
+loaderVersion="[25,)"
 issueTrackerURL="https://github.com/shuen4/MinecraftForge-Mods-ServerPropertiesLAN/issues"
 [[mods]]
 modId="splan"
