@@ -26,6 +26,7 @@ import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -39,7 +40,6 @@ import org.apache.logging.log4j.Logger;
 public class splan {
 	/** server port */
 	private static int port = 0;
-	private static boolean firstRun = false;
 	/** Property manager */
 	private PropertyManagerClient ServerProperties = null;
 	/** Log4j logger */
@@ -48,8 +48,8 @@ public class splan {
 	private IntegratedServer server;
 	/** Only first player joined game send server info */
 	private boolean sent = false;
-	/** Prevent send message to player if joined server not IntegratedServer by this client */
-	private boolean serverstarted = false;
+	/** If the server started with resource pack, close the first ConfirmScreen */
+	private boolean GuiEventDisabled = true;
 	/** null if server running this mod */
 	public static splan instance = null;
 	/** mod initialization */
@@ -66,7 +66,7 @@ public class splan {
 	/** Send server status to first player joined game */
 	@SubscribeEvent
 	public void SendMessageToPlayer(EntityJoinWorldEvent event) {
-		if (!serverstarted)
+		if (server==null)
 			return;
 		if (event.getEntity() instanceof net.minecraft.entity.player.PlayerEntity && !sent) {
 			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("Server Status:"));
@@ -97,20 +97,30 @@ public class splan {
 		sent = true;
 		}
 	}
+	@SubscribeEvent
+	public void onGuiInit(GuiScreenEvent event) {
+		if (server==null||GuiEventDisabled)
+			return;
+		if (event.getGui() instanceof net.minecraft.client.gui.screen.ConfirmScreen) {
+			/** should be the resource pack dialog */
+			LOGGER.info("closing ConfirmScreen");
+			GuiEventDisabled=true;
+			event.getGui().onClose();
+		}
+	}
 	/** reset */
 	@SubscribeEvent
 	public void onServerStopped(FMLServerStoppedEvent event){
 		port = 0;
-		firstRun = false;
 		ServerProperties = null;
 		server = null;
 		sent = false;
-		serverstarted = false;
+		GuiEventDisabled=true;
 	}
 
 	@SubscribeEvent
 	public void onServerStarting(FMLServerStartingEvent event) {
-		serverstarted = true;
+		boolean firstRun = false;
 		server = (IntegratedServer)event.getServer();
 		/** half hardcoded */
 		@SuppressWarnings("resource")
@@ -146,7 +156,7 @@ public class splan {
 			} catch (Exception e) {
 				/** Something went wrong */
 				LOGGER.warn("Could not create local server config file. Using the global one.");
-				e.printStackTrace();
+				LOGGER.warn("",e);
 				/** use global file */
 				ServerProperties = new PropertyManagerClient(global);
 			}
@@ -181,6 +191,8 @@ public class splan {
 		LOGGER.debug("resource-pack = " + server.getResourcePackUrl());
 		LOGGER.debug("resource-pack-sha1 = " + server.getResourcePackHash());
 		LOGGER.debug("motd = " + server.getMOTD());
+		if (!server.getResourcePackUrl().isEmpty())
+			GuiEventDisabled=false;
 		/** Process special data */
 		PlayerList customPlayerList = server.getPlayerList();
 		try {
@@ -189,20 +201,10 @@ public class splan {
 			field.setAccessible(true);
 			field.set(customPlayerList, Integer.valueOf(ServerProperties.getIntProperty("max-players", 10)));
 			LOGGER.debug("Max Players = " + customPlayerList.getMaxPlayers());
-			/** view distance */
-			Field dist = PlayerList.class.getDeclaredField("field_72402_d");
-			dist.setAccessible(true);
-			int d = ServerProperties.getIntProperty("max-view-distance", 0);
-			if (d > 0) {
-				dist.set(customPlayerList, Integer.valueOf(d));
-				LOGGER.debug("Max view distance = " + d);
-			} else
-				LOGGER.debug("max-view-distance is set <= 0. Using default view distance algorithm.");
-			server.setPlayerList(customPlayerList);
 		} catch (Exception E1) {
 			/** Something went wrong */
 			LOGGER.error("Unknown Error:");
-			E1.printStackTrace();
+			LOGGER.error("",E1);
 		}
 		/** useful command*/
 		CommandDispatcher<CommandSource> dispatcher = server.getCommandManager().getDispatcher();
@@ -234,7 +236,7 @@ public class splan {
 			} catch (Exception e) {
 				/** Something went wrong */
 				LOGGER.error("Oops..! Couldn't copy to local server config file. Please manually copy the global server config file to your world save directory.");
-				e.printStackTrace();
+				LOGGER.error("",e);
 			}
 	}
 	/** copied from net.minecraft.server.dedicated.DedicatedServer#loadResourcePackSHA */

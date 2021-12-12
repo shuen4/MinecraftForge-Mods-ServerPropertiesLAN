@@ -1,3 +1,7 @@
+2.69
++ fix setting resource pack crash on 1.13 - 1.16 (prevent resource pack prompt GUI display for host so won't crash, host need to manually apply the resource pack)
++ remove max-view-distance (require modify IntegratedServer tick() to fix)
+
 2.68
 + split code
 

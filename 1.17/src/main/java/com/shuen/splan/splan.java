@@ -43,7 +43,6 @@ import org.apache.logging.log4j.Logger;
 public class splan {
 	/** server port */
 	private static int port = 0;
-	private static boolean firstRun = false;
 	/** Property manager */
 	private PropertyManagerClient ServerProperties = null;
 	/** Log4j logger */
@@ -52,8 +51,6 @@ public class splan {
 	private IntegratedServer server;
 	/** Only first player joined game send server info */
 	private boolean sent = false;
-	/** Prevent send message to player if joined server not IntegratedServer by this client */
-	private boolean serverstarted = false;
 	/** null if server running this mod */
 	public static splan instance = null;
 	/** mod initialization */
@@ -70,7 +67,7 @@ public class splan {
 	/** Send server status to first player joined game */
 	@SubscribeEvent
 	public void SendMessageToPlayer(EntityJoinWorldEvent event) {
-		if (!serverstarted)
+		if (server==null)
 			return;
 		if (event.getEntity() instanceof Player&&!sent) {
 			event.getEntity().sendMessage((Component)new TextComponent("Server Status: "),event.getEntity().getUUID());
@@ -102,16 +99,14 @@ public class splan {
 	@SubscribeEvent
 	public void onServerStopped(FMLServerStoppedEvent event){
 		port = 0;
-		firstRun = false;
 		ServerProperties = null;
 		server = null;
 		sent = false;
-		serverstarted = false;
 	}
 	
 	@SubscribeEvent
 	public void onServerStarting(FMLServerStartingEvent event) {
-		serverstarted = true;
+		boolean firstRun = false;
 		server = (IntegratedServer)event.getServer();
 		String worldrootdir = "";
 		/** server.levelsave.getWorldDir().toString() = world directory full path */
@@ -122,7 +117,7 @@ public class splan {
 			ls = (LevelStorageAccess) f.get(server);
 			worldrootdir = ls.getWorldDir().toString() + File.separator;
 		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e1) {
-			e1.printStackTrace();
+			LOGGER.error("Error getting world directory",e1);
 		}
 		File local = new File(worldrootdir + "server.properties");
 		@SuppressWarnings("resource")
@@ -155,7 +150,7 @@ public class splan {
 			} catch (Exception e) {
 				/** Something went wrong */
 				LOGGER.warn("Could not create local server config file. Using the global one.");
-				e.printStackTrace();
+				LOGGER.warn("",e);
 				/** use global file */
 				ServerProperties = new PropertyManagerClient(global);
 			}
@@ -186,23 +181,14 @@ public class splan {
 		/** Process special data */
 		PlayerList customPlayerList = server.getPlayerList();
 		try {
-			/** view distance */
-			int d = ServerProperties.getIntProperty("max-view-distance", 0);
-			if (d > 0) {
-				customPlayerList.setViewDistance(d);
-				LOGGER.debug("Max view distance = " + d);
-			} else
-				LOGGER.debug("max-view-distance is set <= 0. Using default view distance algorithm.");
-			server.setPlayerList(customPlayerList);
 			/** Max Players */
 			Field field = getField(PlayerList.class,"f_11193_","maxPlayers");
 			field.set(customPlayerList, Integer.valueOf(ServerProperties.getIntProperty("max-players", 10)));
 			LOGGER.debug("Max Players = " + customPlayerList.getMaxPlayers());
-			server.setPlayerList(customPlayerList);
 		} catch (Exception E1) {
 			/** Something went wrong */
 			LOGGER.error("Unknown Error:");
-			E1.printStackTrace();
+			LOGGER.error("",E1);
 		}
 		/** useful command*/
 		CommandDispatcher<CommandSourceStack> dispatcher = server.getCommands().getDispatcher();
@@ -234,7 +220,7 @@ public class splan {
 			} catch (Exception e) {
 				/** Something went wrong */
 				LOGGER.error("Oops..! Couldn't copy to local server config file. Please manually copy the global server config file to your world save directory.");
-				e.printStackTrace();
+				LOGGER.error("",e);
 			}
 	}
 	/** copied from net.minecraft.server.dedicated.DedicatedServer#loadResourcePackSHA */

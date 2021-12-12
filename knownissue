@@ -1,12 +1,6 @@
-known issue:
-	all:
-		#1: max view distance (not working, probably game itself changed distance again)
-	1.13 - 1.16:
-		#2: setting resource pack will make client crash (resource pack dialog)
-
 not tested:
 	all:
-		#1: check global & local properties file in point to expected location
+		#1: check global & local properties file point to expected location
 		#2: player-idle-timeout
 		#3: resource-pack-sha1
 	1.13 - 1.16:
@@ -14,5 +8,3 @@ not tested:
 	1.13 - 1.15:
 		#5: spawn-animals
 		#6: spawn-npcs
-
-known issue #1 & 2: fix only when someone needs it (no guarantee success)

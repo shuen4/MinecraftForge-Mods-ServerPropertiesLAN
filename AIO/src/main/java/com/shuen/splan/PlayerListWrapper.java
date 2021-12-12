@@ -7,23 +7,9 @@ public class PlayerListWrapper {
 	public PlayerListWrapper(Object obj){
 		this.obj=obj;
 	}
-	public void setViewDistance(int d) {
-		try {//1.13 - 1.16
-			((net.minecraft.server.management.PlayerList)obj).func_217884_a(d);
-		} catch (Error E1) {
-			try {//1.17 - 1.18
-				((net.minecraft.server.players.PlayerList)obj).m_11217_(d);
-			} catch (Error E2) {
-				splan.LOGGER.error("Error Setting view distance:");
-				splan.LOGGER.error("Error 1:",E1);
-				splan.LOGGER.error("Error 2:",E2);
-			}
-		}
-	}
 	public void setMaxPlayers(int intProperty) {
 		try {//1.13 - 1.16
 			Field field = splan.getField(net.minecraft.server.management.PlayerList.class,"field_72405_c");
-			field.setAccessible(true);
 			field.set((net.minecraft.server.management.PlayerList)obj,intProperty);
 		} catch (Error|Exception E1) {
 			try {//1.17 - 1.18

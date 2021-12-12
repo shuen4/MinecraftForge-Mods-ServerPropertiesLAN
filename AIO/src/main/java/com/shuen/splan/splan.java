@@ -12,6 +12,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.storage.SaveFormat.LevelSave;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -23,7 +24,6 @@ import org.apache.logging.log4j.Logger;
 public class splan {
 	/** server port */
 	public static int port = 0;
-	public static boolean firstRun = false;
 	/** Property manager */
 	public PropertyManagerClient ServerProperties = null;
 	/** Log4j logger */
@@ -32,8 +32,8 @@ public class splan {
 	public ServerWrapper server;
 	/** Only first player joined game send server info */
 	public boolean sent = false;
-	/** Prevent send message to player if joined server not IntegratedServer by this client */
-	public boolean serverstarted = false;
+	/** If the server started with resource pack, close the first GuiYesNo (1.13) / ConfirmScreen (1.14 - 1.16) */
+	private boolean GuiEventDisabled = true;
 	/** null if server running this mod */
 	public static splan instance = null;
 	/** mod initialization */
@@ -44,26 +44,70 @@ public class splan {
 		}
 		instance = this;
 		MinecraftForge.EVENT_BUS.addListener(this::SendMessageToPlayer);
-		if (ClassExist("net.minecraftforge.fml.event.server.FMLServerStartingEvent"))
+		if (ClassExist("net.minecraftforge.fml.event.server.FMLServerStartingEvent"))//1.13 - 1.16
 			MinecraftForge.EVENT_BUS.addListener(this::onServerStarting1);
-		else if (ClassExist("net.minecraftforge.fmlserverevents.FMLServerStartingEvent"))
+		else if (ClassExist("net.minecraftforge.fmlserverevents.FMLServerStartingEvent"))//1.17
 			MinecraftForge.EVENT_BUS.addListener(this::onServerStarting2);
-		else if (ClassExist("net.minecraftforge.event.server.ServerStartingEvent"))
+		else if (ClassExist("net.minecraftforge.event.server.ServerStartingEvent"))//1.18
 			MinecraftForge.EVENT_BUS.addListener(this::onServerStarting3);
 		else
 			LOGGER.error("Register Server Starting Event failed");
-		if (ClassExist("net.minecraftforge.fml.event.server.FMLServerStoppedEvent"))
+		if (ClassExist("net.minecraftforge.fml.event.server.FMLServerStoppedEvent"))//1.13 - 1.16
 			MinecraftForge.EVENT_BUS.addListener(this::onServerStopped1);
-		else if (ClassExist("net.minecraftforge.fmlserverevents.FMLServerStoppedEvent"))
+		else if (ClassExist("net.minecraftforge.fmlserverevents.FMLServerStoppedEvent"))//1.17
 			MinecraftForge.EVENT_BUS.addListener(this::onServerStopped2);
-		else if (ClassExist("net.minecraftforge.event.server.ServerStoppedEvent"))
+		else if (ClassExist("net.minecraftforge.event.server.ServerStoppedEvent"))//1.18
 			MinecraftForge.EVENT_BUS.addListener(this::onServerStopped3);
 		else
 			LOGGER.error("Register Server Stoped Event failed");
+		/** net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent = 1.13 - 1.17 */
+		if(ClassExist("net.minecraftforge.fml.event.server.FMLServerStartingEvent"))//1.13 - 1.16
+			MinecraftForge.EVENT_BUS.addListener(this::onGuiInit);
+	}
+	
+	public void onGuiInit(GuiScreenEvent event) {
+		if (server==null||GuiEventDisabled)
+			return;
+		if (ClassExist("net.minecraft.client.gui.GuiYesNo")) {//1.13
+			try {
+				net.minecraft.client.gui.GuiScreen gui=(net.minecraft.client.gui.GuiScreen) getField(GuiScreenEvent.class,"gui").get(event);
+				/** should be the resource pack dialog */
+				if (gui instanceof net.minecraft.client.gui.GuiYesNo) {
+					LOGGER.info("closing GuiYesNo");
+					GuiEventDisabled=true;
+					gui.close();
+				}
+			} catch (Exception e) {
+				LOGGER.error("Error parse Gui",e);
+			}
+		}
+		else {//1.14 - 1.16
+			try {
+				net.minecraft.client.gui.screen.Screen gui=(net.minecraft.client.gui.screen.Screen) getField(GuiScreenEvent.class,"gui").get(event);
+				/** should be the resource pack dialog */
+				if (gui instanceof net.minecraft.client.gui.screen.ConfirmScreen) {
+					LOGGER.info("closing ConfirmScreen");
+					GuiEventDisabled=true;
+					try {//1.14 - 1.15
+						gui.onClose();
+					} catch (Error E1) {
+						try{//1.16
+							gui.func_231175_as__();
+						} catch (Error E2) {
+							LOGGER.error("Error Closing ConfirmScreen");
+							LOGGER.error("",E1);
+							LOGGER.error("",E2);
+						}
+					}
+				}
+			} catch (Exception e) {
+				LOGGER.error("Error parse Gui",e);
+			}
+		}
 	}
 	/** Send server status to first player joined game */
 	public void SendMessageToPlayer(EntityJoinWorldEvent event) {
-		if (!serverstarted)
+		if (server==null)
 			return;
 		if (sent)
 			return;
@@ -87,11 +131,10 @@ public class splan {
 	/** reset */
 	public void onServerStopped(Object obj){
 		port = 0;
-		firstRun = false;
 		ServerProperties = null;
 		server = null;
 		sent = false;
-		serverstarted = false;
+		GuiEventDisabled=true;
 	}
 	//1.13 - 1.16
 	public void onServerStarting1(net.minecraftforge.fml.event.server.FMLServerStartingEvent event) {
@@ -107,6 +150,7 @@ public class splan {
 	}
 	
 	public void onServerStarting(Object obj) {
+		boolean firstRun=false;
 		String gameDir="";
 		try {
 			gameDir=""+(Minecraft.getInstance()).gameDir;
@@ -117,8 +161,7 @@ public class splan {
 				LOGGER.error("Error getting gameDir");
 			}
 		}
-		serverstarted = true;
-		try { //1.13-1.16
+		try { //1.13 - 1.16
 			server = new ServerWrapper(((net.minecraftforge.fml.event.server.FMLServerStartingEvent)obj).getServer());
 		} catch (Error E1) {
 			try {//1.17
@@ -127,7 +170,7 @@ public class splan {
 				try {//1.18
 					server = new ServerWrapper(((net.minecraftforge.event.server.ServerStartingEvent)obj).getServer());	
 				} catch (Error E3) {
-					LOGGER.error("Error dispatch ServerEvent");
+					LOGGER.error("Error parse ServerEvent");
 					LOGGER.error("Error 1:",E1);
 					LOGGER.error("Error 2:",E2);
 					LOGGER.error("Error 3:",E3);
@@ -142,14 +185,12 @@ public class splan {
 			try {//1.16
 				/** server.levelsave.getWorldDir().toString() = world directory full path */
 				Field f = getField(MinecraftServer.class,"field_71310_m","f_129744_","storageSource");
-				f.setAccessible(true);
 				LevelSave ls=(LevelSave) f.get(server.getObj());
 				worldrootdir = ls.getWorldDir().toString() + File.separator;
 			} catch (Exception | Error E2) {
 				try {//1.17 - 1.18
 					/** server.storageSource.getWorldDir().toString() = world directory full path */
 					Field f = getField(MinecraftServer.class,"f_129744_","storageSource");
-					f.setAccessible(true);
 					LevelStorageSource.LevelStorageAccess ls=(LevelStorageSource.LevelStorageAccess) f.get(server.getObj());
 					worldrootdir = ls.getWorldDir().toString() + File.separator;
 				} catch (Exception | Error E3) {
@@ -231,19 +272,14 @@ public class splan {
 		LOGGER.debug("resource-pack = " + server.getResourcePackUrl());
 		LOGGER.debug("resource-pack-sha1 = " + server.getResourcePackHash());
 		LOGGER.debug("motd = " + server.getMOTD());
+		if (!server.getResourcePackUrl().isEmpty())
+			GuiEventDisabled=false;
 		/** Process special data */
 		PlayerListWrapper customPlayerList = new PlayerListWrapper(server.getPlayerList());
 		try {
 			/** Max Players */
 			customPlayerList.setMaxPlayers(ServerProperties.getIntProperty("max-players", 10));
 			LOGGER.debug("Max Players = " + customPlayerList.getMaxPlayers());
-			/** view distance */
-			int d = ServerProperties.getIntProperty("max-view-distance", 0);
-			if (d > 0) {
-				customPlayerList.setViewDistance(d);
-				LOGGER.debug("Max view distance = " + d);
-			} else
-				LOGGER.debug("max-view-distance is set <= 0. Using default view distance algorithm.");
 		} catch (Exception E1) {
 			/** Something went wrong */
 			LOGGER.error("Unknown Error:");
