@@ -39,7 +39,9 @@ import org.apache.logging.log4j.Logger;
 @Mod("splan")
 public class splan {
 	/** server port */
-	private static int port = 0;
+	private int port = 0;
+	private boolean bisNetherEnabled=true;
+	private boolean bisCommandBlockEnabled=true;
 	/** Property manager */
 	private PropertyManagerClient ServerProperties = null;
 	/** Log4j logger */
@@ -83,11 +85,8 @@ public class splan {
 			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("resource-pack = " + server.getResourcePackUrl())); 
 		if (!server.getResourcePackHash().isEmpty())
 			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("resource-pack-sha1 = " + server.getResourcePackHash())); 
-		int i = ServerProperties.getIntProperty("max-view-distance", 0);
-		if (i > 0)
-			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("max-view-distance = " + i));
-		else
-			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("max-view-distance = default"));
+		event.getEntity().sendMessage((ITextComponent)new StringTextComponent("allow-nether = " + bisNetherEnabled));
+		event.getEntity().sendMessage((ITextComponent)new StringTextComponent("enable-command-block = " + bisCommandBlockEnabled));
 		if (port>0 && port<=65535)
 			event.getEntity().sendMessage((ITextComponent)new StringTextComponent("port = " + port));
 		else
@@ -116,6 +115,8 @@ public class splan {
 		server = null;
 		sent = false;
 		GuiEventDisabled=true;
+		bisNetherEnabled=true;
+		bisCommandBlockEnabled=true;
 	}
 
 	@SubscribeEvent
@@ -128,7 +129,7 @@ public class splan {
 		File local = new File(worldrootdir + "server.properties");
 		@SuppressWarnings("resource")
 		File global = new File((Minecraft.getInstance()).gameDir + File.separator + "config" + File.separator + "serverGlobalConfig.properties");
-		LOGGER.debug("Integrated Server Starting");
+		LOGGER.info("Integrated Server Starting");
 		if (!global.exists()) {
 			/** create new file */
 			firstRun = true;
@@ -139,7 +140,7 @@ public class splan {
 			if (!ServerProperties.getBooleanProperty("overrideGlobalDefaults", true)) {
 				/** use global */
 				ServerProperties.setPropertiesFile(global);
-				LOGGER.debug("Using Global Server Properties !");
+				LOGGER.info("Using Global Server Properties !");
 			}
 		} else {
 			try {
@@ -162,7 +163,6 @@ public class splan {
 			}
 		}
 		LOGGER.info("Using file : " + (ServerProperties.getBooleanProperty("overrideGlobalDefaults", true) ? local.getPath() : global.getPath()));
-		server = (IntegratedServer)event.getServer();
 		ServerProperties.comment = "Minecraft Server Properties for LAN." + System.getProperty("line.separator") 
 								 + "For default behaviour :-" + System.getProperty("line.separator") 
 								 + "set max-view-distance=0" + System.getProperty("line.separator") 
@@ -179,18 +179,23 @@ public class splan {
 		server.setMOTD(ServerProperties.getStringProperty("motd", "<! " + server.getServerOwner() + "'s " + server.getWorldName() + " ON LAN !>"));
 		server.setPlayerIdleTimeout(ServerProperties.getIntProperty("player-idle-timeout", 0));
 		server.setBuildLimit(ServerProperties.getIntProperty("max-build-height", 256));
+		sent=!ServerProperties.getBooleanProperty("send-server-status", true);
+		bisNetherEnabled=ServerProperties.getBooleanProperty("allow-nether", true);
+		bisCommandBlockEnabled=ServerProperties.getBooleanProperty("enable-command-block", true);
 		/** Debug info */
-		LOGGER.debug("Server Status:");
-		LOGGER.debug("online-mode = " + server.isServerInOnlineMode());
-		LOGGER.debug("spawn-animals = " + server.getCanSpawnAnimals());
-		LOGGER.debug("spawn-npcs = " + server.getCanSpawnNPCs());
-		LOGGER.debug("pvp = " + server.isPVPEnabled());
-		LOGGER.debug("allow-flight = " + server.isFlightAllowed());
-		LOGGER.debug("player-idle-timeout = " + server.getMaxPlayerIdleMinutes());
-		LOGGER.debug("max-build-height = " + server.getBuildLimit());
-		LOGGER.debug("resource-pack = " + server.getResourcePackUrl());
-		LOGGER.debug("resource-pack-sha1 = " + server.getResourcePackHash());
-		LOGGER.debug("motd = " + server.getMOTD());
+		LOGGER.info("Server Status:");
+		LOGGER.info("online-mode = " + server.isServerInOnlineMode());
+		LOGGER.info("spawn-animals = " + server.getCanSpawnAnimals());
+		LOGGER.info("spawn-npcs = " + server.getCanSpawnNPCs());
+		LOGGER.info("pvp = " + server.isPVPEnabled());
+		LOGGER.info("allow-flight = " + server.isFlightAllowed());
+		LOGGER.info("player-idle-timeout = " + server.getMaxPlayerIdleMinutes());
+		LOGGER.info("max-build-height = " + server.getBuildLimit());
+		LOGGER.info("resource-pack = " + server.getResourcePackUrl());
+		LOGGER.info("resource-pack-sha1 = " + server.getResourcePackHash());
+		LOGGER.info("motd = " + server.getMOTD());
+		LOGGER.info("allow-nether = " + bisNetherEnabled);
+		LOGGER.info("enable-command-block = " + bisCommandBlockEnabled);
 		if (!server.getResourcePackUrl().isEmpty())
 			GuiEventDisabled=false;
 		/** Process special data */
@@ -200,7 +205,7 @@ public class splan {
 			Field field = PlayerList.class.getDeclaredField("field_72405_c");
 			field.setAccessible(true);
 			field.set(customPlayerList, Integer.valueOf(ServerProperties.getIntProperty("max-players", 10)));
-			LOGGER.debug("Max Players = " + customPlayerList.getMaxPlayers());
+			LOGGER.info("Max Players = " + customPlayerList.getMaxPlayers());
 		} catch (Exception E1) {
 			/** Something went wrong */
 			LOGGER.error("Unknown Error:");
@@ -259,8 +264,8 @@ public class splan {
 	/** ASM Handler */
 	public static int getPort() {
 		/** if not server running mod and port is valid */
-		if (instance != null && port > 0 && port <= 65535)
-			return port;
+		if (instance != null && instance.port > 0 && instance.port <= 65535)
+			return instance.port;
 		/** if server running mod or port is invalid*/
 		else
 			/** act like normal client */
@@ -269,5 +274,11 @@ public class splan {
 			} catch (IOException e) {
 				return 25564;
 			}
+	}
+	public static boolean isNetherEnabled() {
+		return instance.bisNetherEnabled;
+	}
+	public static boolean isCommandBlockEnabled() {
+		return instance.bisCommandBlockEnabled;
 	}
 }

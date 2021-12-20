@@ -23,7 +23,12 @@ import org.apache.logging.log4j.Logger;
 @Mod("splan")
 public class splan {
 	/** server port */
-	public static int port = 0;
+	public int port = 0;
+	public boolean bisNetherEnabled=true;
+	public boolean bisCommandBlockEnabled=true;
+	public boolean brepliesToStatus=true;
+	public boolean bisResourcePackRequired=false;
+	public boolean bhidesOnlinePlayers=false;
 	/** Property manager */
 	public PropertyManagerClient ServerProperties = null;
 	/** Log4j logger */
@@ -135,6 +140,11 @@ public class splan {
 		server = null;
 		sent = false;
 		GuiEventDisabled=true;
+		bisNetherEnabled=true;
+		bisCommandBlockEnabled=true;
+		brepliesToStatus=true;
+		bisResourcePackRequired=false;
+		bhidesOnlinePlayers=false;
 	}
 	//1.13 - 1.16
 	public void onServerStarting1(net.minecraftforge.fml.event.server.FMLServerStartingEvent event) {
@@ -204,7 +214,7 @@ public class splan {
 		}
 		File local = new File(worldrootdir + "server.properties");
 		File global = new File(gameDir + File.separator + "config" + File.separator + "serverGlobalConfig.properties");
-		LOGGER.debug("Integrated Server Starting");
+		LOGGER.info("Integrated Server Starting");
 		if (!global.exists()) {
 			/** create new file */
 			firstRun = true;
@@ -215,7 +225,7 @@ public class splan {
 			if (!ServerProperties.getBooleanProperty("overrideGlobalDefaults", true)) {
 				/** use global */
 				ServerProperties.setPropertiesFile(global);
-				LOGGER.debug("Using Global Server Properties !");
+				LOGGER.info("Using Global Server Properties !");
 			}
 		} else {
 			try {
@@ -257,21 +267,32 @@ public class splan {
 		server.setResourcePack(ServerProperties.getStringProperty("resource-pack", ""), loadResourcePackSHA());
 		server.setMOTD(ServerProperties.getStringProperty("motd", "<! " + server.getServerOwner() + "'s " + server.getWorldName() + " ON LAN !>"));
 		server.setPlayerIdleTimeout(ServerProperties.getIntProperty("player-idle-timeout", 0));
+		sent=!ServerProperties.getBooleanProperty("send-server-status", true);
+		bisNetherEnabled=ServerProperties.getBooleanProperty("allow-nether", true);
+		bisCommandBlockEnabled=ServerProperties.getBooleanProperty("enable-command-block", true);
+		brepliesToStatus=ServerProperties.getBooleanProperty("enable-status", true);
+		bisResourcePackRequired=ServerProperties.getBooleanProperty("require-resource-pack", false);
+		bhidesOnlinePlayers=ServerProperties.getBooleanProperty("hide-online-players", false);
 		/** Debug info */
-		LOGGER.debug("Server Status:");
-		LOGGER.debug("online-mode = " + server.isServerInOnlineMode());
+		LOGGER.info("Server Status:");
+		LOGGER.info("online-mode = " + server.isServerInOnlineMode());
 		try {//1.13 - 1.16
-			LOGGER.debug("max-build-height = " + server.getBuildLimit());
+			LOGGER.info("max-build-height = " + server.getBuildLimit());
 			//1.13 - 1.15
-			LOGGER.debug("spawn-animals = " + server.getCanSpawnAnimals());
-			LOGGER.debug("spawn-npcs = " + server.getCanSpawnNPCs());
+			LOGGER.info("spawn-animals = " + server.getCanSpawnAnimals());
+			LOGGER.info("spawn-npcs = " + server.getCanSpawnNPCs());
 		} catch (Error E1) {}
-		LOGGER.debug("pvp = " + server.isPVPEnabled());
-		LOGGER.debug("allow-flight = " + server.isFlightAllowed());
-		LOGGER.debug("player-idle-timeout = " + server.getMaxPlayerIdleMinutes());
-		LOGGER.debug("resource-pack = " + server.getResourcePackUrl());
-		LOGGER.debug("resource-pack-sha1 = " + server.getResourcePackHash());
-		LOGGER.debug("motd = " + server.getMOTD());
+		LOGGER.info("pvp = " + server.isPVPEnabled());
+		LOGGER.info("allow-flight = " + server.isFlightAllowed());
+		LOGGER.info("player-idle-timeout = " + server.getMaxPlayerIdleMinutes());
+		LOGGER.info("resource-pack = " + server.getResourcePackUrl());
+		LOGGER.info("resource-pack-sha1 = " + server.getResourcePackHash());
+		LOGGER.info("motd = " + server.getMOTD());
+		LOGGER.info("allow-nether = " + bisNetherEnabled);
+		LOGGER.info("enable-command-block = " + bisCommandBlockEnabled);
+		LOGGER.info("enable-status = " + brepliesToStatus);
+		LOGGER.info("require-resource-pack = " + bisResourcePackRequired);
+		LOGGER.info("hide-online-players = " + bhidesOnlinePlayers);
 		if (!server.getResourcePackUrl().isEmpty())
 			GuiEventDisabled=false;
 		/** Process special data */
@@ -279,7 +300,7 @@ public class splan {
 		try {
 			/** Max Players */
 			customPlayerList.setMaxPlayers(ServerProperties.getIntProperty("max-players", 10));
-			LOGGER.debug("Max Players = " + customPlayerList.getMaxPlayers());
+			LOGGER.info("Max Players = " + customPlayerList.getMaxPlayers());
 		} catch (Exception E1) {
 			/** Something went wrong */
 			LOGGER.error("Unknown Error:");
@@ -352,7 +373,7 @@ public class splan {
 			LOGGER.warn("You specified a resource pack without providing a sha1 hash. Pack will be updated on the client only if you change the name of the pack."); 
 		return s;
 	}
-	private boolean ClassExist(String classname) {
+	public static boolean ClassExist(String classname) {
 		try {
 			Class.forName(classname);
 		} catch (ClassNotFoundException e) {
@@ -363,8 +384,8 @@ public class splan {
 	/** ASM Handler */
 	public static int getPort() {
 		/** if not server running mod and port is valid */
-		if (instance != null && port > 0 && port <= 65535)
-			return port;
+		if (instance != null && instance.port > 0 && instance.port <= 65535)
+			return instance.port;
 		/** if server running mod or port is invalid*/
 		else
 			/** act like normal client */
@@ -373,6 +394,21 @@ public class splan {
 			} catch (IOException e) {
 				return 25564;
 			}
+	}
+	public static boolean isNetherEnabled() {
+		return instance.bisNetherEnabled;
+	}
+	public static boolean isCommandBlockEnabled() {
+		return instance.bisCommandBlockEnabled;
+	}
+	public static boolean repliesToStatus() {
+		return instance.brepliesToStatus;
+	}
+	public static boolean isResourcePackRequired() {
+		return instance.bisResourcePackRequired;
+	}
+	public static boolean hidesOnlinePlayers() {
+		return instance.bhidesOnlinePlayers;
 	}
 	public static Field getField(Class<?> c,String... fn) throws Exception {
 		for (String s:fn) {

@@ -22,13 +22,10 @@ public class EntityJoinWorldEvent1 {
 					event.getEntity().sendMessage(new TextComponentString("resource-pack = " + server.getResourcePackUrl())); 
 				if (!server.getResourcePackHash().isEmpty())
 					event.getEntity().sendMessage(new TextComponentString("resource-pack-sha1 = " + server.getResourcePackHash())); 
-				int i = splan.instance.ServerProperties.getIntProperty("max-view-distance", 0);
-				if (i > 0)
-					event.getEntity().sendMessage(new TextComponentString("max-view-distance = " + i));
-				else
-					event.getEntity().sendMessage(new TextComponentString("max-view-distance = default"));
-				if (splan.port>0 && splan.port<=65535)
-					event.getEntity().sendMessage(new TextComponentString("port = " + splan.port));
+				event.getEntity().sendMessage(new TextComponentString("allow-nether = " + splan.instance.bisNetherEnabled));
+				event.getEntity().sendMessage(new TextComponentString("enable-command-block = " + splan.instance.bisCommandBlockEnabled));
+				if (splan.instance.port>0 && splan.instance.port<=65535)
+					event.getEntity().sendMessage(new TextComponentString("port = " + splan.instance.port));
 				else
 					event.getEntity().sendMessage(new TextComponentString("port = random"));
 				event.getEntity().sendMessage(new TextComponentString("use /whitelist command control whitelist"));
@@ -52,13 +49,10 @@ public class EntityJoinWorldEvent1 {
 					event.getEntity().sendMessage(new StringTextComponent("resource-pack = " + server.getResourcePackUrl())); 
 				if (!server.getResourcePackHash().isEmpty())
 					event.getEntity().sendMessage(new StringTextComponent("resource-pack-sha1 = " + server.getResourcePackHash())); 
-				int i = splan.instance.ServerProperties.getIntProperty("max-view-distance", 0);
-				if (i > 0)
-					event.getEntity().sendMessage(new StringTextComponent("max-view-distance = " + i));
-				else
-					event.getEntity().sendMessage(new StringTextComponent("max-view-distance = default"));
-				if (splan.port>0 && splan.port<=65535)
-					 event.getEntity().sendMessage(new StringTextComponent("port = " + splan.port));
+				event.getEntity().sendMessage(new StringTextComponent("allow-nether = " + splan.instance.bisNetherEnabled));
+				event.getEntity().sendMessage(new StringTextComponent("enable-command-block = " + splan.instance.bisCommandBlockEnabled));
+				if (splan.instance.port>0 && splan.instance.port<=65535)
+					 event.getEntity().sendMessage(new StringTextComponent("port = " + splan.instance.port));
 				else
 					 event.getEntity().sendMessage(new StringTextComponent("port = random"));
 				event.getEntity().sendMessage(new StringTextComponent("use /whitelist command control whitelist"));
@@ -80,13 +74,11 @@ public class EntityJoinWorldEvent1 {
 							event.getEntity().func_145747_a(new StringTextComponent("resource-pack = " + server.getResourcePackUrl()),event.getEntity().getUniqueID()); 
 						if (!server.getResourcePackHash().isEmpty())
 							event.getEntity().func_145747_a(new StringTextComponent("resource-pack-sha1 = " + server.getResourcePackHash()),event.getEntity().getUniqueID()); 
-						int i = splan.instance.ServerProperties.getIntProperty("max-view-distance", 0);
-						if (i > 0)
-							event.getEntity().func_145747_a(new StringTextComponent("max-view-distance = " + i),event.getEntity().getUniqueID());
-						else
-							event.getEntity().func_145747_a(new StringTextComponent("max-view-distance = default"),event.getEntity().getUniqueID());
-						if (splan.port>0 && splan.port<=65535)
-							event.getEntity().func_145747_a(new StringTextComponent("port = " + splan.port),event.getEntity().getUniqueID());
+						event.getEntity().func_145747_a(new StringTextComponent("allow-nether = " + splan.instance.bisNetherEnabled),event.getEntity().getUniqueID());
+						event.getEntity().func_145747_a(new StringTextComponent("enable-command-block = " + splan.instance.bisCommandBlockEnabled),event.getEntity().getUniqueID());
+						event.getEntity().func_145747_a(new StringTextComponent("enable-status = " + splan.instance.brepliesToStatus),event.getEntity().getUniqueID());
+						if (splan.instance.port>0 && splan.instance.port<=65535)
+							event.getEntity().func_145747_a(new StringTextComponent("port = " + splan.instance.port),event.getEntity().getUniqueID());
 						else
 							event.getEntity().func_145747_a(new StringTextComponent("port = random"),event.getEntity().getUniqueID());
 						event.getEntity().func_145747_a(new StringTextComponent("use /whitelist command control whitelist"),event.getEntity().getUniqueID());

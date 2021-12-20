@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.util.regex.Pattern;
-
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
@@ -42,7 +41,11 @@ import org.apache.logging.log4j.Logger;
 @Mod("splan")
 public class splan {
 	/** server port */
-	private static int port = 0;
+	private int port = 0;
+	private boolean bisNetherEnabled=true;
+	private boolean bisCommandBlockEnabled=true;
+	private boolean brepliesToStatus=true;
+	private boolean bisResourcePackRequired=false;
 	/** Property manager */
 	private PropertyManagerClient ServerProperties = null;
 	/** Log4j logger */
@@ -81,11 +84,10 @@ public class splan {
 				event.getEntity().sendMessage((Component)new TextComponent("resource-pack = " + server.getResourcePack()),event.getEntity().getUUID()); 
 			if (!server.getResourcePackHash().isEmpty())
 				event.getEntity().sendMessage((Component)new TextComponent("resource-pack-sha1 = " + server.getResourcePackHash()),event.getEntity().getUUID()); 
-			int i = ServerProperties.getIntProperty("max-view-distance", 0);
-			if (i > 0)
-				event.getEntity().sendMessage((Component)new TextComponent("max-view-distance = " + i),event.getEntity().getUUID());
-			else
-				event.getEntity().sendMessage((Component)new TextComponent("max-view-distance = default"),event.getEntity().getUUID());
+			event.getEntity().sendMessage((Component)new TextComponent("allow-nether = " + bisNetherEnabled),event.getEntity().getUUID());
+			event.getEntity().sendMessage((Component)new TextComponent("enable-command-block = " + bisCommandBlockEnabled),event.getEntity().getUUID());
+			event.getEntity().sendMessage((Component)new TextComponent("enable-status = " + brepliesToStatus),event.getEntity().getUUID());
+			event.getEntity().sendMessage((Component)new TextComponent("require-resource-pack = " + bisResourcePackRequired),event.getEntity().getUUID());
 			if (port>0 && port<=65535)
 				event.getEntity().sendMessage((Component)new TextComponent("port = " + port),event.getEntity().getUUID());
 			else
@@ -102,6 +104,10 @@ public class splan {
 		ServerProperties = null;
 		server = null;
 		sent = false;
+		bisNetherEnabled=true;
+		bisCommandBlockEnabled=true;
+		brepliesToStatus=true;
+		bisResourcePackRequired=false;
 	}
 	
 	@SubscribeEvent
@@ -122,7 +128,7 @@ public class splan {
 		File local = new File(worldrootdir + "server.properties");
 		@SuppressWarnings("resource")
 		File global = new File((Minecraft.getInstance()).gameDirectory + File.separator + "config" + File.separator + "serverGlobalConfig.properties");
-		LOGGER.debug("Integrated Server Starting");
+		LOGGER.info("Integrated Server Starting");
 		if (!global.exists()) {
 			/** create new file */
 			firstRun = true;
@@ -133,7 +139,7 @@ public class splan {
 			if (!ServerProperties.getBooleanProperty("overrideGlobalDefaults", true)) {
 				/** use global */
 				ServerProperties.setPropertiesFile(global);
-				LOGGER.debug("Using Global Server Properties !");
+				LOGGER.info("Using Global Server Properties !");
 			}
 		} else {
 			try {
@@ -156,7 +162,6 @@ public class splan {
 			}
 		}
 		LOGGER.info("Using file : " + (ServerProperties.getBooleanProperty("overrideGlobalDefaults", true) ? local.getPath() : global.getPath()));
-		server = (IntegratedServer)event.getServer();
 		ServerProperties.comment = "Minecraft Server Properties for LAN." + System.getProperty("line.separator") 
 								 + "For default behaviour :-" + System.getProperty("line.separator") 
 								 + "set max-view-distance=0" + System.getProperty("line.separator") 
@@ -170,21 +175,30 @@ public class splan {
 		server.setResourcePack(ServerProperties.getStringProperty("resource-pack", ""), loadResourcePackSHA());
 		server.setMotd(ServerProperties.getStringProperty("motd", "<! " + server.getSingleplayerName() + "'s " + server.getWorldData().getLevelName() + " ON LAN !>"));
 		server.setPlayerIdleTimeout(ServerProperties.getIntProperty("player-idle-timeout", 0));
+		sent=!ServerProperties.getBooleanProperty("send-server-status", true);
+		bisNetherEnabled=ServerProperties.getBooleanProperty("allow-nether", true);
+		bisCommandBlockEnabled=ServerProperties.getBooleanProperty("enable-command-block", true);
+		brepliesToStatus=ServerProperties.getBooleanProperty("enable-status", true);
+		bisResourcePackRequired=ServerProperties.getBooleanProperty("require-resource-pack", false);
 		/** Debug info */
-		LOGGER.debug("Server Status:");
-		LOGGER.debug("online-mode = " + server.usesAuthentication());
-		LOGGER.debug("pvp = " + server.isPvpAllowed());
-		LOGGER.debug("allow-flight = " + server.isFlightAllowed());
-		LOGGER.debug("player-idle-timeout = " + server.getPlayerIdleTimeout());
-		LOGGER.debug("resource-pack-sha1 = " + server.getResourcePackHash());
-		LOGGER.debug("motd = " + server.getMotd());
+		LOGGER.info("Server Status:");
+		LOGGER.info("online-mode = " + server.usesAuthentication());
+		LOGGER.info("pvp = " + server.isPvpAllowed());
+		LOGGER.info("allow-flight = " + server.isFlightAllowed());
+		LOGGER.info("player-idle-timeout = " + server.getPlayerIdleTimeout());
+		LOGGER.info("resource-pack-sha1 = " + server.getResourcePackHash());
+		LOGGER.info("motd = " + server.getMotd());
+		LOGGER.info("allow-nether = " + bisNetherEnabled);
+		LOGGER.info("enable-command-block = " + bisCommandBlockEnabled);
+		LOGGER.info("enable-status = " + brepliesToStatus);
+		LOGGER.info("require-resource-pack = " + bisResourcePackRequired);
 		/** Process special data */
 		PlayerList customPlayerList = server.getPlayerList();
 		try {
 			/** Max Players */
 			Field field = getField(PlayerList.class,"f_11193_","maxPlayers");
 			field.set(customPlayerList, Integer.valueOf(ServerProperties.getIntProperty("max-players", 10)));
-			LOGGER.debug("Max Players = " + customPlayerList.getMaxPlayers());
+			LOGGER.info("Max Players = " + customPlayerList.getMaxPlayers());
 		} catch (Exception E1) {
 			/** Something went wrong */
 			LOGGER.error("Unknown Error:");
@@ -243,8 +257,8 @@ public class splan {
 	/** ASM Handler */
 	public static int getPort() {
 		/** if not server running mod and port is valid */
-		if (instance != null && port > 0 && port <= 65535)
-			return port;
+		if (instance != null && instance.port > 0 && instance.port <= 65535)
+			return instance.port;
 		/** if server running mod or port is invalid*/
 		else
 			/** act like normal client */
@@ -253,6 +267,18 @@ public class splan {
 			} catch (IOException e) {
 				return 25564;
 			}
+	}
+	public static boolean isNetherEnabled() {
+		return instance.bisNetherEnabled;
+	}
+	public static boolean isCommandBlockEnabled() {
+		return instance.bisCommandBlockEnabled;
+	}
+	public static boolean repliesToStatus() {
+		return instance.brepliesToStatus;
+	}
+	public static boolean isResourcePackRequired() {
+		return instance.bisResourcePackRequired;
 	}
 	private static Field getField(Class<?> c,String... fn) throws NoSuchFieldException {
 		for (String s:fn) {

@@ -1,3 +1,7 @@
+2.70 (less testing)
++ add server option (allow-nether enable-command-block enable-status[1.16+] require-resource-pack[1.17+] hide-online-players[1.18+])
++ add mod option send-server-status (control whether to send server status after joining)
+
 2.69
 + fix setting resource pack crash on 1.13 - 1.16 (prevent resource pack prompt GUI display for host so won't crash, host need to manually apply the resource pack)
 + remove max-view-distance (require modify IntegratedServer tick() to fix)
@@ -9,18 +13,19 @@
 + fix issue #1 (tested only Forge 1.17.1-37.0.104)
 
 2.67a
-+ Optimize text display
-+ Add code comments
-+ Disable if mod is running on forge server
++ optimize text display
++ add code comments
++ disable if mod is running on forge server
 
 2.67
-+ Will not open server port on player join
++ will not open server port on player join
 
 2.66b
-+ Fix Whitelist not working (move to /whitelist command #require allow-cheat on)
-+ Fix client with mod join server will make it unplayable
++ fix Whitelist not working (move to /whitelist command #require allow-cheat on)
++ fix client with mod join server will make it unplayable
 
 2.66a
-+ Fix LAN port text to actual port instead of port 0
++ fix LAN port text to actual port instead of port 0
 
-2.66 - Initialize version for mc 1.13+
+2.66 
++ initialize version for mc 1.13+
