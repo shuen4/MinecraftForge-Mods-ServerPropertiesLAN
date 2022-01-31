@@ -6,3 +6,5 @@ For 1.13 or higher https://github.com/shuen4/MinecraftForge-Mods-ServerPropertie
 Note:
 + Only server host need install this mod (other players is not required but still can install this mod)
 + This mod will not work on forge server
++ This mod re-adds dedicated server commands (/ban /ban-ip /banlist /op /deop /pardon /pardon-ip /save-all /save-off /save-on /setidletimeout /whitelist /kick /list /stop)
+  all commands require allow cheats & /op /deop only works if the world allows cheats and open to LAN without cheats allowed

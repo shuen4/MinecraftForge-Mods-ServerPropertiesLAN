@@ -322,6 +322,11 @@ public class splan {
 			net.minecraft.command.impl.SetIdleTimeoutCommand.register(dispatcher);
 			net.minecraft.command.impl.StopCommand.register(dispatcher);
 			net.minecraft.command.impl.WhitelistCommand.register(dispatcher);
+			net.minecraft.command.impl.KickCommand.register(dispatcher);
+			try {//1.13 - 1.15 for /ban /ban-ip /banlist /pardon /pardon-ip commands
+				((net.minecraft.server.management.PlayerList)server.getPlayerList()).func_72363_f().setLanServer(true);
+				((net.minecraft.server.management.PlayerList)server.getPlayerList()).func_152608_h().setLanServer(true);
+			} catch (Error E) {}
 		} catch (Error E) {//1.17 - 1.18
 			CommandDispatcher<CommandSourceStack> dispatcher = server.getCommandManager1().m_82094_();
 			net.minecraft.server.commands.BanIpCommands.m_136527_(dispatcher);
@@ -337,6 +342,7 @@ public class splan {
 			net.minecraft.server.commands.SetPlayerIdleTimeoutCommand.m_138634_(dispatcher);
 			net.minecraft.server.commands.StopCommand.m_138785_(dispatcher);
 			net.minecraft.server.commands.WhitelistCommand.m_139201_(dispatcher);
+			net.minecraft.server.commands.KickCommand.m_137795_(dispatcher);
 		}
 		if (firstRun)
 			try {

@@ -1,3 +1,7 @@
+2.70a (less testing)
++ fix /ban /ban-ip /banlist /pardon /pardon-ip commands display permission error on 1.13 - 1.15
++ add missing /kick command
+
 2.70 (less testing)
 + add server option (allow-nether enable-command-block enable-status[1.16+] require-resource-pack[1.17+] hide-online-players[1.18+])
 + add mod option send-server-status (control whether to send server status after joining)

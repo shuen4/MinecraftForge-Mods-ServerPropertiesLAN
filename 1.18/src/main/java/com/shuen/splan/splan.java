@@ -23,6 +23,7 @@ import net.minecraft.server.commands.SaveOnCommand;
 import net.minecraft.server.commands.SetPlayerIdleTimeoutCommand;
 import net.minecraft.server.commands.StopCommand;
 import net.minecraft.server.commands.WhitelistCommand;
+import net.minecraft.server.commands.KickCommand;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.players.PlayerList;
@@ -224,6 +225,7 @@ public class splan {
 		SetPlayerIdleTimeoutCommand.register(dispatcher);
 		StopCommand.register(dispatcher);
 		WhitelistCommand.register(dispatcher);
+		KickCommand.register(dispatcher);
 		if (firstRun)
 			try {
 				/** copy global file to world directory */

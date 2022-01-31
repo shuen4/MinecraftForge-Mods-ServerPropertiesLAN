@@ -13,6 +13,7 @@ import net.minecraft.command.impl.BanCommand;
 import net.minecraft.command.impl.BanIpCommand;
 import net.minecraft.command.impl.BanListCommand;
 import net.minecraft.command.impl.DeOpCommand;
+import net.minecraft.command.impl.KickCommand;
 import net.minecraft.command.impl.OpCommand;
 import net.minecraft.command.impl.PardonCommand;
 import net.minecraft.command.impl.PardonIpCommand;
@@ -225,6 +226,7 @@ public class splan {
 		SetIdleTimeoutCommand.register(dispatcher);
 		StopCommand.register(dispatcher);
 		WhitelistCommand.register(dispatcher);
+		KickCommand.register(dispatcher);
 		if (firstRun)
 			try {
 				/** copy global file to world directory */

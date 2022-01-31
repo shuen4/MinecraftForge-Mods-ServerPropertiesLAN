@@ -3,6 +3,7 @@ not tested:
 		#1: check global & local properties file point to expected location
 		#2: player-idle-timeout
 		#3: resource-pack-sha1
+		#7: commands /ban /ban-ip /banlist /op /deop /pardon /pardon-ip /save-all /save-off /save-on /setidletimeout /whitelist /kick /list /stop
 	1.13 - 1.16:
 		#4: max-build-height
 	1.13 - 1.15:

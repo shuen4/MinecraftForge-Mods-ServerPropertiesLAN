@@ -13,6 +13,7 @@ import net.minecraft.command.impl.BanCommand;
 import net.minecraft.command.impl.BanIpCommand;
 import net.minecraft.command.impl.BanListCommand;
 import net.minecraft.command.impl.DeOpCommand;
+import net.minecraft.command.impl.KickCommand;
 import net.minecraft.command.impl.OpCommand;
 import net.minecraft.command.impl.PardonCommand;
 import net.minecraft.command.impl.PardonIpCommand;
@@ -210,6 +211,9 @@ public class splan {
 			LOGGER.error("Unknown Error:");
 			LOGGER.error("",E1);
 		}
+		/** for /ban /ban-ip /banlist /pardon /pardon-ip commands */
+    	server.getPlayerList().getBannedIPs().setLanServer(true);
+    	server.getPlayerList().getBannedPlayers().setLanServer(true);
 		/** useful command*/
 		CommandDispatcher<CommandSource> dispatcher = server.getCommandManager().getDispatcher();
 		BanIpCommand.register(dispatcher);
@@ -225,6 +229,7 @@ public class splan {
 		SetIdleTimeoutCommand.register(dispatcher);
 		StopCommand.register(dispatcher);
 		WhitelistCommand.register(dispatcher);
+		KickCommand.register(dispatcher);
 		if (firstRun)
 			try {
 				/** copy global file to world directory */
