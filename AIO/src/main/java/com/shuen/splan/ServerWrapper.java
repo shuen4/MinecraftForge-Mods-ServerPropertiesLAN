@@ -1,7 +1,5 @@
 package com.shuen.splan;
 
-import net.minecraft.command.Commands;
-
 public class ServerWrapper {
 	private Object obj;
 	public ServerWrapper(Object obj) {
@@ -35,7 +33,7 @@ public class ServerWrapper {
 		//1.13 - 1.16
 		return ((net.minecraft.server.integrated.IntegratedServer)obj).getBuildLimit();
 	}
-	public Commands getCommandManager() {
+	public net.minecraft.command.Commands getCommandManager() {
 		//1.13 - 1.16
 		return ((net.minecraft.server.integrated.IntegratedServer)obj).getCommandManager();
 	}
@@ -82,16 +80,22 @@ public class ServerWrapper {
 			}
 		}
 	}
-	public void setResourcePack(String stringProperty, String loadResourcePackSHA) {
+	public void setResourcePack(String url, String hash) {
 		try {//1.13 - 1.16
-			((net.minecraft.server.integrated.IntegratedServer)obj).setResourcePack(stringProperty, loadResourcePackSHA);
+			((net.minecraft.server.integrated.IntegratedServer)obj).setResourcePack(url, hash);
 		} catch (Error E1) {
 			try {// 1.17 - 1.18
-				((net.minecraft.client.server.IntegratedServer)obj).m_129853_(stringProperty,loadResourcePackSHA);
+				((net.minecraft.client.server.IntegratedServer)obj).m_129853_(url,hash);
 			} catch (Error E2) {
-				splan.LOGGER.error("Error Setting Resource Pack");
-				splan.LOGGER.error("Error 1:",E1);
-				splan.LOGGER.error("Error 2:",E2);
+				if (splan.ClassExist("net.minecraft.server.MinecraftServer$ServerResourcePackInfo")) {//1.19
+					splan.instance.ResourcePackUrl=url;
+					splan.instance.ResourcePackHash=hash;
+				}
+				else {
+					splan.LOGGER.error("Error Setting Resource Pack");
+					splan.LOGGER.error("Error 1:",E1);
+					splan.LOGGER.error("Error 2:",E2);
+				}
 			}
 		}
 	}
@@ -102,9 +106,14 @@ public class ServerWrapper {
 			try {// 1.17 - 1.18
 				return ((net.minecraft.client.server.IntegratedServer)obj).m_129791_();
 			} catch (Error E2) {
-				splan.LOGGER.error("Error Getting Server Owner");
-				splan.LOGGER.error("Error 1:",E1);
-				splan.LOGGER.error("Error 2:",E2);
+				try {//1.19
+					return ((net.minecraft.client.server.IntegratedServer)obj).m_236731_().getName();
+				} catch (Error E3) {
+					splan.LOGGER.error("Error Getting Server Owner");
+					splan.LOGGER.error("Error 1:",E1);
+					splan.LOGGER.error("Error 2:",E2);
+					splan.LOGGER.error("Error 3:",E3);
+				}
 			}
 		}
 		return null;
@@ -218,9 +227,13 @@ public class ServerWrapper {
 			try {// 1.17 - 1.18
 				return ((net.minecraft.client.server.IntegratedServer)obj).m_129795_();
 			} catch (Error E2) {
-				splan.LOGGER.error("Error Getting Resource Pack URL");
-				splan.LOGGER.error("Error 1:",E1);
-				splan.LOGGER.error("Error 2:",E2);
+				if (splan.ClassExist("net.minecraft.server.MinecraftServer$ServerResourcePackInfo"))//1.19
+					return splan.instance.ResourcePackUrl;
+				else {
+					splan.LOGGER.error("Error Getting Resource Pack URL");
+					splan.LOGGER.error("Error 1:",E1);
+					splan.LOGGER.error("Error 2:",E2);
+				}
 			}
 		}
 		return null;
@@ -232,9 +245,13 @@ public class ServerWrapper {
 			try {// 1.17 - 1.18
 				return ((net.minecraft.client.server.IntegratedServer)obj).m_129796_();
 			} catch (Error E2) {
-				splan.LOGGER.error("Error Getting Resource Pack Hash");
-				splan.LOGGER.error("Error 1:",E1);
-				splan.LOGGER.error("Error 2:",E2);
+				if (splan.ClassExist("net.minecraft.server.MinecraftServer$ServerResourcePackInfo"))//1.19
+					return splan.instance.ResourcePackHash;
+				else {
+					splan.LOGGER.error("Error Getting Resource Pack Hash");
+					splan.LOGGER.error("Error 1:",E1);
+					splan.LOGGER.error("Error 2:",E2);
+				}
 			}
 		}
 		return null;
@@ -274,7 +291,7 @@ public class ServerWrapper {
 			try {// 1.17 - 1.18
 				return ((net.minecraft.client.server.IntegratedServer)obj).m_7418_();
 			} catch (Error E2) {
-				splan.LOGGER.error("Error Getting Command Manager");
+				splan.LOGGER.error("Error Getting Max Players");
 				splan.LOGGER.error("Error 1:",E1);
 				splan.LOGGER.error("Error 2:",E2);
 			}
@@ -283,5 +300,19 @@ public class ServerWrapper {
 	}
 	public Object getObj() {
 		return obj;
+	}
+	public java.nio.file.Path getWorldPath(String s) {
+		try {//1.16
+			return ((net.minecraft.server.integrated.IntegratedServer)obj).func_240776_a_(new net.minecraft.world.storage.FolderName(s));
+		} catch (Error E1) {
+			try {// 1.17 - 1.19
+				return ((net.minecraft.client.server.IntegratedServer)obj).m_129843_(new net.minecraft.world.level.storage.LevelResource(s));
+			} catch (Error E2) {
+				splan.LOGGER.error("Error Getting World Path");
+				splan.LOGGER.error("Error 1:",E1);
+				splan.LOGGER.error("Error 2:",E2);
+			}
+		}
+		return null;
 	}
 }

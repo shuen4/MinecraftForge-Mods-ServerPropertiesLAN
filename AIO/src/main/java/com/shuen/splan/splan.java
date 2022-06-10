@@ -6,16 +6,14 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.storage.SaveFormat.LevelSave;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +27,8 @@ public class splan {
 	public boolean brepliesToStatus=true;
 	public boolean bisResourcePackRequired=false;
 	public boolean bhidesOnlinePlayers=false;
+	public String ResourcePackUrl=null;
+	public String ResourcePackHash=null;
 	/** Property manager */
 	public PropertyManagerClient ServerProperties = null;
 	/** Log4j logger */
@@ -118,8 +118,10 @@ public class splan {
 			return;
 		if (ClassExist("net.minecraft.util.text.ITextComponent"))//1.13 - 1.16
 			EntityJoinWorldEvent1.onEvent(event,server);
-		else//1.17 - 1.18
+		else if (ClassExist("net.minecraft.network.chat.TextComponent"))//1.17 - 1.18
 			EntityJoinWorldEvent2.onEvent(event,server);
+		else//1.19
+			EntityJoinWorldEvent3.onEvent(event,server);
 	}
 	//1.13 - 1.16
 	public void onServerStopped1(net.minecraftforge.fml.event.server.FMLServerStoppedEvent event) {
@@ -192,24 +194,13 @@ public class splan {
 			/** half hardcoded */
 			worldrootdir = gameDir + File.separator + "saves" + File.separator + server.getFolderName() + File.separator;
 		} catch (Error E1) {
-			try {//1.16
-				/** server.levelsave.getWorldDir().toString() = world directory full path */
-				Field f = getField(MinecraftServer.class,"field_71310_m","f_129744_","storageSource");
-				LevelSave ls=(LevelSave) f.get(server.getObj());
-				worldrootdir = ls.getWorldDir().toString() + File.separator;
-			} catch (Exception | Error E2) {
-				try {//1.17 - 1.18
-					/** server.storageSource.getWorldDir().toString() = world directory full path */
-					Field f = getField(MinecraftServer.class,"f_129744_","storageSource");
-					LevelStorageSource.LevelStorageAccess ls=(LevelStorageSource.LevelStorageAccess) f.get(server.getObj());
-					worldrootdir = ls.getWorldDir().toString() + File.separator;
-				} catch (Exception | Error E3) {
-					/** Something went wrong */
-					LOGGER.error("Error get world directory:");
-					LOGGER.error("Error 1:",E1);
-					LOGGER.error("Error 2:",E2);
-					LOGGER.error("Error 3:",E3);
-				}
+			try {//1.16 - 1.19
+				worldrootdir = this.server.getWorldPath("").toString() + File.separator;
+			} catch (Error E2) {
+				/** Something went wrong */
+				LOGGER.error("Error get world directory:");
+				LOGGER.error("Error 1:",E1);
+				LOGGER.error("Error 2:",E2);
 			}
 		}
 		File local = new File(worldrootdir + "server.properties");
@@ -412,6 +403,9 @@ public class splan {
 	}
 	public static boolean isResourcePackRequired() {
 		return instance.bisResourcePackRequired;
+	}
+	public static Optional<net.minecraft.server.MinecraftServer.ServerResourcePackInfo> getServerResourcePack() {
+		return Optional.of(new net.minecraft.server.MinecraftServer.ServerResourcePackInfo(instance.ResourcePackUrl,instance.ResourcePackHash,instance.bisResourcePackRequired,null));
 	}
 	public static boolean hidesOnlinePlayers() {
 		return instance.bhidesOnlinePlayers;

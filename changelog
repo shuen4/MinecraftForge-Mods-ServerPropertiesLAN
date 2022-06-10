@@ -1,20 +1,25 @@
-2.70a (less testing)
-+ fix /ban /ban-ip /banlist /pardon /pardon-ip commands display permission error on 1.13 - 1.15
+2.71
++ minecraft 1.19
++ changed find world folder code to be the same as 1.19
++ fix extra '{' in js files & convert tab to space (js works even without this fix)
+
+2.70a
++ fix /ban /ban-ip /banlist /pardon /pardon-ip commands display permission error on 1.13 - 1.15 (issue #6)
 + add missing /kick command
 
-2.70 (less testing)
-+ add server option (allow-nether enable-command-block enable-status[1.16+] require-resource-pack[1.17+] hide-online-players[1.18+])
+2.70
++ add server option (allow-nether enable-command-block enable-status[1.16+] require-resource-pack[1.17+] hide-online-players[1.18+]) (issue #4)
 + add mod option send-server-status (control whether to send server status after joining)
 
 2.69
-+ fix setting resource pack crash on 1.13 - 1.16 (prevent resource pack prompt GUI display for host so won't crash, host need to manually apply the resource pack)
++ fix setting resource pack crash on 1.13 - 1.16 (prevent resource pack prompt GUI display for host so won't crash, host need to manually apply the resource pack) (issue #3)
 + remove max-view-distance (require modify IntegratedServer tick() to fix)
 
 2.68
-+ split code
++ split code (PR #2)
 
 2.67b
-+ fix issue #1 (tested only Forge 1.17.1-37.0.104)
++ fix resource pack not loaded (tested only Forge 1.17.1-37.0.104) (issue #1)
 
 2.67a
 + optimize text display

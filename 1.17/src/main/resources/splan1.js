@@ -22,7 +22,7 @@ function initializeCoreMod() {
                 var methods = classNode.methods;
                 var tmp=[];
                 
-                for (m in methods){
+                for (m in methods)
                     for (n in namelist)
                         if (methods[m].name===namelist[n])
                             tmp.push(m);

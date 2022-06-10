@@ -27,6 +27,7 @@ import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.storage.FolderName;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -125,9 +126,7 @@ public class splan {
 	public void onServerStarting(FMLServerStartingEvent event) {
 		boolean firstRun = false;
 		server = (IntegratedServer)event.getServer();
-		/** half hardcoded */
-		@SuppressWarnings("resource")
-		String worldrootdir = (Minecraft.getInstance()).gameDirectory + File.separator + "saves" + File.separator + server.getServerDirectory() + File.separator;
+		String worldrootdir = server.getWorldPath(new FolderName("")).toString() + File.separator;
 		File local = new File(worldrootdir + "server.properties");
 		@SuppressWarnings("resource")
 		File global = new File((Minecraft.getInstance()).gameDirectory + File.separator + "config" + File.separator + "serverGlobalConfig.properties");

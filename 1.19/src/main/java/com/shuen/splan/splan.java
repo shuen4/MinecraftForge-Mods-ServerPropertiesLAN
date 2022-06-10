@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.client.Minecraft;
@@ -24,10 +25,10 @@ import net.minecraft.server.commands.SetPlayerIdleTimeoutCommand;
 import net.minecraft.server.commands.StopCommand;
 import net.minecraft.server.commands.WhitelistCommand;
 import net.minecraft.server.commands.KickCommand;
+import net.minecraft.server.MinecraftServer.ServerResourcePackInfo;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -45,8 +46,8 @@ public class splan {
 	private boolean bisNetherEnabled=true;
 	private boolean bisCommandBlockEnabled=true;
 	private boolean brepliesToStatus=true;
-	private boolean bisResourcePackRequired=false;
 	private boolean bhidesOnlinePlayers=false;
+	private ServerResourcePackInfo rgetServerResourcePack;
 	/** Property manager */
 	private PropertyManagerClient ServerProperties = null;
 	/** Log4j logger */
@@ -74,28 +75,28 @@ public class splan {
 		if (server==null)
 			return;
 		if (event.getEntity() instanceof Player&&!sent) {
-			event.getEntity().sendMessage((Component)new TextComponent("Server Status: "),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("online-mode = " + server.usesAuthentication()),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("pvp = " + server.isPvpAllowed()),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("allow-flight = " + server.isFlightAllowed()),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("player-idle-timeout = " + server.getPlayerIdleTimeout()),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("motd = " + server.getMotd()),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("max-players = " + server.getMaxPlayers()),event.getEntity().getUUID());
-			if (!server.getResourcePack().isEmpty())
-				event.getEntity().sendMessage((Component)new TextComponent("resource-pack = " + server.getResourcePack()),event.getEntity().getUUID()); 
-			if (!server.getResourcePackHash().isEmpty())
-				event.getEntity().sendMessage((Component)new TextComponent("resource-pack-sha1 = " + server.getResourcePackHash()),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("allow-nether = " + bisNetherEnabled),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("enable-command-block = " + bisCommandBlockEnabled),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("enable-status = " + brepliesToStatus),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("require-resource-pack = " + bisResourcePackRequired),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("hide-online-players = " + bhidesOnlinePlayers),event.getEntity().getUUID());
+			event.getEntity().sendSystemMessage(Component.literal("Server Status: "));
+			event.getEntity().sendSystemMessage(Component.literal("online-mode = " + server.usesAuthentication()));
+			event.getEntity().sendSystemMessage(Component.literal("pvp = " + server.isPvpAllowed()));
+			event.getEntity().sendSystemMessage(Component.literal("allow-flight = " + server.isFlightAllowed()));
+			event.getEntity().sendSystemMessage(Component.literal("player-idle-timeout = " + server.getPlayerIdleTimeout()));
+			event.getEntity().sendSystemMessage(Component.literal("motd = " + server.getMotd()));
+			event.getEntity().sendSystemMessage(Component.literal("max-players = " + server.getMaxPlayers()));
+			if (!server.getServerResourcePack().isEmpty()) {
+				event.getEntity().sendSystemMessage(Component.literal("resource-pack = " + server.getServerResourcePack().get().url()));
+				event.getEntity().sendSystemMessage(Component.literal("resource-pack-sha1 = " + server.getServerResourcePack().get().hash()));
+				event.getEntity().sendSystemMessage(Component.literal("require-resource-pack = " + server.getServerResourcePack().get().isRequired()));
+			}
+			event.getEntity().sendSystemMessage(Component.literal("allow-nether = " + bisNetherEnabled));
+			event.getEntity().sendSystemMessage(Component.literal("enable-command-block = " + bisCommandBlockEnabled));
+			event.getEntity().sendSystemMessage(Component.literal("enable-status = " + brepliesToStatus));
+			event.getEntity().sendSystemMessage(Component.literal("hide-online-players = " + bhidesOnlinePlayers));
 			if (port>0 && port<=65535)
-				event.getEntity().sendMessage((Component)new TextComponent("port = " + port),event.getEntity().getUUID());
+				event.getEntity().sendSystemMessage(Component.literal("port = " + port));
 			else
-				event.getEntity().sendMessage((Component)new TextComponent("port = random"),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("use /whitelist command control whitelist"),event.getEntity().getUUID());
-			event.getEntity().sendMessage((Component)new TextComponent("^ require allow-cheat on"),event.getEntity().getUUID());
+				event.getEntity().sendSystemMessage(Component.literal("port = random"));
+			event.getEntity().sendSystemMessage(Component.literal("use /whitelist command control whitelist"));
+			event.getEntity().sendSystemMessage(Component.literal("^ require allow-cheat on"));
 			sent = true;
 		}
 	}
@@ -109,7 +110,6 @@ public class splan {
 		bisNetherEnabled=true;
 		bisCommandBlockEnabled=true;
 		brepliesToStatus=true;
-		bisResourcePackRequired=false;
 		bhidesOnlinePlayers=false;
 	}
 	
@@ -118,6 +118,16 @@ public class splan {
 		boolean firstRun = false;
 		server = (IntegratedServer)event.getServer();
 		String worldrootdir = server.getWorldPath(new LevelResource("")).toString() + File.separator;
+		/** server.levelsave.getWorldDir().toString() = world directory full path
+		Field f;
+		LevelStorageAccess ls;
+		try {
+			f = getField(MinecraftServer.class,"f_129744_","storageSource");
+			ls = (LevelStorageAccess) f.get(server);
+			worldrootdir = ls.getWorldDir().toString() + File.separator;
+		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e1) {
+			LOGGER.error("Error getting world directory",e1);
+		}*/
 		File local = new File(worldrootdir + "server.properties");
 		@SuppressWarnings("resource")
 		File global = new File((Minecraft.getInstance()).gameDirectory + File.separator + "config" + File.separator + "serverGlobalConfig.properties");
@@ -165,27 +175,27 @@ public class splan {
 		server.setUsesAuthentication(ServerProperties.getBooleanProperty("online-mode", true));
 		server.setPvpAllowed(ServerProperties.getBooleanProperty("pvp", true));
 		server.setFlightAllowed(ServerProperties.getBooleanProperty("allow-flight", false));
-		server.setResourcePack(ServerProperties.getStringProperty("resource-pack", ""), loadResourcePackSHA());
-		server.setMotd(ServerProperties.getStringProperty("motd", "<! " + server.getSingleplayerName() + "'s " + server.getWorldData().getLevelName() + " ON LAN !>"));
+		server.setMotd(ServerProperties.getStringProperty("motd", "<! " + server.getSingleplayerProfile().getName() + "'s " + server.getWorldData().getLevelName() + " ON LAN !>"));
 		server.setPlayerIdleTimeout(ServerProperties.getIntProperty("player-idle-timeout", 0));
 		sent=!ServerProperties.getBooleanProperty("send-server-status", true);
 		bisNetherEnabled=ServerProperties.getBooleanProperty("allow-nether", true);
 		bisCommandBlockEnabled=ServerProperties.getBooleanProperty("enable-command-block", true);
 		brepliesToStatus=ServerProperties.getBooleanProperty("enable-status", true);
-		bisResourcePackRequired=ServerProperties.getBooleanProperty("require-resource-pack", false);
 		bhidesOnlinePlayers=ServerProperties.getBooleanProperty("hide-online-players", false);
+		rgetServerResourcePack=new ServerResourcePackInfo(ServerProperties.getStringProperty("resource-pack", ""), loadResourcePackSHA(), ServerProperties.getBooleanProperty("require-resource-pack", false), null);
 		/** Debug info */
 		LOGGER.info("Server Status:");
 		LOGGER.info("online-mode = " + server.usesAuthentication());
 		LOGGER.info("pvp = " + server.isPvpAllowed());
 		LOGGER.info("allow-flight = " + server.isFlightAllowed());
 		LOGGER.info("player-idle-timeout = " + server.getPlayerIdleTimeout());
-		LOGGER.info("resource-pack-sha1 = " + server.getResourcePackHash());
+		LOGGER.info("resource-pack = " + server.getServerResourcePack().get().url());
+		LOGGER.info("resource-pack-sha1 = " + server.getServerResourcePack().get().hash());
 		LOGGER.info("motd = " + server.getMotd());
 		LOGGER.info("allow-nether = " + bisNetherEnabled);
 		LOGGER.info("enable-command-block = " + bisCommandBlockEnabled);
 		LOGGER.info("enable-status = " + brepliesToStatus);
-		LOGGER.info("require-resource-pack = " + bisResourcePackRequired);
+		LOGGER.info("require-resource-pack = " + server.getServerResourcePack().get().isRequired());
 		LOGGER.info("hide-online-players = " + bhidesOnlinePlayers);
 		/** Process special data */
 		PlayerList customPlayerList = server.getPlayerList();
@@ -273,8 +283,8 @@ public class splan {
 	public static boolean repliesToStatus() {
 		return instance.brepliesToStatus;
 	}
-	public static boolean isResourcePackRequired() {
-		return instance.bisResourcePackRequired;
+	public static Optional<ServerResourcePackInfo> getServerResourcePack() {
+		return Optional.of(instance.rgetServerResourcePack);
 	}
 	public static boolean hidesOnlinePlayers() {
 		return instance.bhidesOnlinePlayers;

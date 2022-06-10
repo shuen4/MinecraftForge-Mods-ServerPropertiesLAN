@@ -24,12 +24,11 @@ import net.minecraft.server.commands.SetPlayerIdleTimeoutCommand;
 import net.minecraft.server.commands.StopCommand;
 import net.minecraft.server.commands.WhitelistCommand;
 import net.minecraft.server.commands.KickCommand;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.world.level.storage.LevelStorageSource.LevelStorageAccess;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -115,17 +114,7 @@ public class splan {
 	public void onServerStarting(FMLServerStartingEvent event) {
 		boolean firstRun = false;
 		server = (IntegratedServer)event.getServer();
-		String worldrootdir = "";
-		/** server.levelsave.getWorldDir().toString() = world directory full path */
-		Field f;
-		LevelStorageAccess ls;
-		try {
-			f = getField(MinecraftServer.class,"f_129744_","storageSource");
-			ls = (LevelStorageAccess) f.get(server);
-			worldrootdir = ls.getWorldDir().toString() + File.separator;
-		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e1) {
-			LOGGER.error("Error getting world directory",e1);
-		}
+		String worldrootdir = server.getWorldPath(new LevelResource("")).toString() + File.separator;
 		File local = new File(worldrootdir + "server.properties");
 		@SuppressWarnings("resource")
 		File global = new File((Minecraft.getInstance()).gameDirectory + File.separator + "config" + File.separator + "serverGlobalConfig.properties");
