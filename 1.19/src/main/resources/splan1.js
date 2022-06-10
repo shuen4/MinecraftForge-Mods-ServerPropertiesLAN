@@ -8,7 +8,7 @@ function initializeCoreMod() {
             'transformer': function (classNode) {
                 var namelist = ["m_7079_","isNetherEnabled","m_6993_","isCommandBlockEnabled","m_6373_","repliesToStatus","m_183306_","hidesOnlinePlayers","m_214042_","getServerResourcePack"];
                 var desc = ["()Z","()Ljava/util/Optional;"];
-				
+                
                 var asmHandler = "com/shuen/splan/splan";
                 var asmMethodName = ["isNetherEnabled","isCommandBlockEnabled","repliesToStatus","hidesOnlinePlayers","getServerResourcePack"];
                 var asmMethodDesc = ["()Z","()Ljava/util/Optional;"];

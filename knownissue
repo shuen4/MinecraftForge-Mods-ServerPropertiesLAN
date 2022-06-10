@@ -1,11 +1,13 @@
 not tested:
-	all:
-		#1: check global & local properties file point to expected location
-		#2: player-idle-timeout
-		#3: resource-pack-sha1
-		#7: commands /ban /ban-ip /banlist /op /deop /pardon /pardon-ip /save-all /save-off /save-on /setidletimeout /whitelist /kick /list /stop
-	1.13 - 1.16:
-		#4: max-build-height
-	1.13 - 1.15:
-		#5: spawn-animals
-		#6: spawn-npcs
+    1.13 - 1.18:
+        #1: check global & local properties file point to expected location
+        #8: commands /ban /ban-ip /banlist /op /deop /pardon /pardon-ip /save-all /whitelist /kick /list /stop
+    1.13 - 1.19:
+        #2: player-idle-timeout
+        #3: resource-pack-sha1
+        #7: commands /save-off /save-on /setidletimeout
+    1.13 - 1.16:
+        #4: max-build-height
+    1.13 - 1.15:
+        #5: spawn-animals
+        #6: spawn-npcs

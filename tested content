@@ -1,37 +1,37 @@
 2.71:
-	minecraft 1.19:
-		resource-pack
-		require-resource-pack
-		port
-		max players
-		allow-nether
-		enable-command-block
-		hide-online-players
-		motd
-		online-mode
-		pvp
-		enable-status
-		send-server-status
-		all commands except /save-off /save-on /setidletimeout
+    minecraft 1.19:
+        resource-pack
+        require-resource-pack
+        port
+        max players
+        allow-nether
+        enable-command-block
+        hide-online-players
+        motd
+        online-mode
+        pvp
+        enable-status
+        send-server-status
+        all commands except /save-off /save-on /setidletimeout
 
 2.70a:
-	minecraft 1.13 1.14 1.15:
-		commands /ban /ban-ip /banlist /pardon /pardon-ip
+    minecraft 1.13 1.14 1.15:
+        commands /ban /ban-ip /banlist /pardon /pardon-ip
 2.70:
-	minecraft 1.13 1.14 1.15 1.16 1.17 1.18:
-		allow-nether
-		enable-command-block
-	minecraft 1.16 1.17 1.18:
-		enable-status
-	minecraft 1.17 1.18:
-		require-resource-pack
-	minecraft 1.18:
-		hide-online-players
+    minecraft 1.13 1.14 1.15 1.16 1.17 1.18:
+        allow-nether
+        enable-command-block
+    minecraft 1.16 1.17 1.18:
+        enable-status
+    minecraft 1.17 1.18:
+        require-resource-pack
+    minecraft 1.18:
+        hide-online-players
 
 2.69:
-	minecraft 1.13 1.14 1.15 1.16:
-		resource-pack
+    minecraft 1.13 1.14 1.15 1.16:
+        resource-pack
 
 2.67b:
-	minecraft 1.17:
-		resource-pack
+    minecraft 1.17:
+        resource-pack

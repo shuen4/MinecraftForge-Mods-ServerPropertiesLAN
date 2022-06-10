@@ -6,21 +6,21 @@ function initializeCoreMod() {
                 'name': 'net.minecraft.client.server.IntegratedServer'
             },
             'transformer': function (classNode) {
-				var namelist = ["m_7079_","isNetherEnabled","m_6993_","isCommandBlockEnabled","m_6373_","repliesToStatus","m_142205_","isResourcePackRequired","m_183306_","hidesOnlinePlayers","m_214042_","getServerResourcePack"];
-				var desc = ["()Z","()Ljava/util/Optional;"];
-				
-            	var asmHandler = "com/shuen/splan/splan";
-            	var asmMethodName = ["isNetherEnabled","isCommandBlockEnabled","repliesToStatus","isResourcePackRequired","hidesOnlinePlayers","getServerResourcePack"];
-				var asmMethodDesc = ["()Z","()Ljava/util/Optional;"];
-				
+                var namelist = ["m_7079_","isNetherEnabled","m_6993_","isCommandBlockEnabled","m_6373_","repliesToStatus","m_142205_","isResourcePackRequired","m_183306_","hidesOnlinePlayers","m_214042_","getServerResourcePack"];
+                var desc = ["()Z","()Ljava/util/Optional;"];
+                
+                var asmHandler = "com/shuen/splan/splan";
+                var asmMethodName = ["isNetherEnabled","isCommandBlockEnabled","repliesToStatus","isResourcePackRequired","hidesOnlinePlayers","getServerResourcePack"];
+                var asmMethodDesc = ["()Z","()Ljava/util/Optional;"];
+                
                 var Opcodes = Java.type("org.objectweb.asm.Opcodes");
                 var MethodNode = Java.type("org.objectweb.asm.tree.MethodNode");
-				var InsnList = Java.type("org.objectweb.asm.tree.InsnList");
-				var MethodInsnNode = Java.type("org.objectweb.asm.tree.MethodInsnNode");
-				var InsnNode = Java.type("org.objectweb.asm.tree.InsnNode");
+                var InsnList = Java.type("org.objectweb.asm.tree.InsnList");
+                var MethodInsnNode = Java.type("org.objectweb.asm.tree.MethodInsnNode");
+                var InsnNode = Java.type("org.objectweb.asm.tree.InsnNode");
 
                 var methods = classNode.methods;
-				var tmp=[];
+                var tmp=[];
                 
                 for (m in methods)
                     for (n in namelist)

@@ -6,17 +6,17 @@ function initializeCoreMod() {
                 'name': 'net.minecraft.util.HttpUtil'
             },
             'transformer': function (classNode) {
-				var SRG_Name = "func_76181_a";
-				var name = "getSuitableLanPort";
-				var desc = "(I)V";
-				
-            	var asmHandler = "com/shuen/splan/splan";
-            	var asmMethodName = "getPort";
-				var asmMethodDesc = "()I";
-				
+                var SRG_Name = "func_76181_a";
+                var name = "getSuitableLanPort";
+                var desc = "(I)V";
+                
+                var asmHandler = "com/shuen/splan/splan";
+                var asmMethodName = "getPort";
+                var asmMethodDesc = "()I";
+                
                 var Opcodes = Java.type("org.objectweb.asm.Opcodes");
                 var MethodInsnNode = Java.type("org.objectweb.asm.tree.MethodInsnNode");
-				var AbstractInsnNode = Java.type("org.objectweb.asm.tree.AbstractInsnNode");
+                var AbstractInsnNode = Java.type("org.objectweb.asm.tree.AbstractInsnNode");
 
                 var methods = classNode.methods;
                 for (m in methods) 
@@ -31,13 +31,13 @@ function initializeCoreMod() {
                             var instruction = instr[t];
                             if (instruction.getType() === AbstractInsnNode.METHOD_INSN && instruction.getOpcode() === Opcodes.INVOKESPECIAL && instruction.desc === desc)
                             {
-								var instruction2 = instruction.getPrevious();
-								if (instruction2.getOpcode() === Opcodes.ICONST_0)
-								{
-									code.remove(instruction2);
-									code.insertBefore(instruction,new MethodInsnNode(Opcodes.INVOKESTATIC, asmHandler, asmMethodName, asmMethodDesc, false));
-								}
-        						break;
+                                var instruction2 = instruction.getPrevious();
+                                if (instruction2.getOpcode() === Opcodes.ICONST_0)
+                                {
+                                    code.remove(instruction2);
+                                    code.insertBefore(instruction,new MethodInsnNode(Opcodes.INVOKESTATIC, asmHandler, asmMethodName, asmMethodDesc, false));
+                                }
+                                break;
                             }
                         }
                         break;

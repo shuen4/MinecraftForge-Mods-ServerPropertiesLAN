@@ -24,8 +24,8 @@ function initializeCoreMod() {
                 
                 for (m in methods)
                     for (n in namelist)
-						if (namelist[n]==="")
-							continue;
+                        if (namelist[n]==="")
+                            continue;
                         else if (methods[m].name===namelist[n])
                             tmp.push(m);
                 for (m in tmp)
