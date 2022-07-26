@@ -8,6 +8,7 @@ import java.net.ServerSocket;
 import java.util.regex.Pattern;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.social.PlayerSocialManager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.commands.BanPlayerCommands;
@@ -25,6 +26,7 @@ import net.minecraft.server.commands.StopCommand;
 import net.minecraft.server.commands.WhitelistCommand;
 import net.minecraft.server.commands.KickCommand;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.client.server.LanServerPinger;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -66,6 +68,22 @@ public class splan {
         }
         instance = this;
         MinecraftForge.EVENT_BUS.register(this);
+    }
+    public boolean stop_LAN() {
+        try {
+            server.getConnection().stop();
+            getField(IntegratedServer.class,"publishedPort","f_120017_").set(server,-1);
+            Field f=getField(IntegratedServer.class,"lanPinger","f_120018_");
+            LanServerPinger lsp=(LanServerPinger) f.get(server);
+            lsp.interrupt();
+            f.set(server,null);
+            getField(IntegratedServer.class,"publishedGameType","f_174966_").set(server,null);
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("Error stopping LAN");
+            LOGGER.error("",e);
+            return false;
+        }
     }
     /** Send server status to first player joined game */
     @SubscribeEvent
@@ -186,8 +204,7 @@ public class splan {
         PlayerList customPlayerList = server.getPlayerList();
         try {
             /** Max Players */
-            Field field = getField(PlayerList.class,"f_11193_","maxPlayers");
-            field.set(customPlayerList, Integer.valueOf(ServerProperties.getIntProperty("max-players", 10)));
+            getField(PlayerList.class,"f_11193_","maxPlayers").set(customPlayerList, Integer.valueOf(ServerProperties.getIntProperty("max-players", 10)));
             LOGGER.info("Max Players = " + customPlayerList.getMaxPlayers());
         } catch (Exception E1) {
             /** Something went wrong */
@@ -210,6 +227,7 @@ public class splan {
         StopCommand.register(dispatcher);
         WhitelistCommand.register(dispatcher);
         KickCommand.register(dispatcher);
+        StopLANCommand.register(dispatcher);
         if (firstRun)
             try {
                 /** copy global file to world directory */

@@ -6,43 +6,43 @@ public class ServerWrapper {
         this.obj=obj;
     }
     public String getFolderName() {
-        //1.13 - 1.15
+        // 1.13 - 1.15
         return ((net.minecraft.server.integrated.IntegratedServer)obj).getFolderName();
     }
     public void setCanSpawnAnimals(boolean booleanProperty) {
-        //1.13 - 1.15
+        // 1.13 - 1.15
         ((net.minecraft.server.integrated.IntegratedServer)obj).setCanSpawnAnimals(booleanProperty);
     }
     public void setCanSpawnNPCs(boolean booleanProperty) {
-        //1.13 - 1.15
+        // 1.13 - 1.15
         ((net.minecraft.server.integrated.IntegratedServer)obj).setCanSpawnNPCs(booleanProperty);
     }
     public boolean getCanSpawnAnimals() {
-        //1.13 - 1.15
+        // 1.13 - 1.15
         return ((net.minecraft.server.integrated.IntegratedServer)obj).getCanSpawnAnimals();
     }
     public boolean getCanSpawnNPCs() {
-        //1.13 - 1.15
+        // 1.13 - 1.15
         return ((net.minecraft.server.integrated.IntegratedServer)obj).getCanSpawnNPCs();
     }
     public void setBuildLimit(int intProperty) {
-        //1.13 - 1.16
+        // 1.13 - 1.16
         ((net.minecraft.server.integrated.IntegratedServer)obj).setBuildLimit(intProperty);
     }
     public int getBuildLimit() {
-        //1.13 - 1.16
+        // 1.13 - 1.16
         return ((net.minecraft.server.integrated.IntegratedServer)obj).getBuildLimit();
     }
     public net.minecraft.command.Commands getCommandManager() {
-        //1.13 - 1.16
+        // 1.13 - 1.16
         return ((net.minecraft.server.integrated.IntegratedServer)obj).getCommandManager();
     }
     public net.minecraft.commands.Commands getCommandManager1() {
-        //1.17 - 1.18
+        // 1.17 - 1.18
         return ((net.minecraft.client.server.IntegratedServer)obj).m_129892_();
     }
     public void setOnlineMode(boolean booleanProperty) {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             ((net.minecraft.server.integrated.IntegratedServer)obj).setOnlineMode(booleanProperty);
         } catch (Error E1) {
             try {// 1.17 - 1.18
@@ -55,7 +55,7 @@ public class ServerWrapper {
         }
     }
     public void setAllowPvp(boolean booleanProperty) {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             ((net.minecraft.server.integrated.IntegratedServer)obj).setAllowPvp(booleanProperty);
         } catch (Error E1) {
             try {// 1.17 - 1.18
@@ -68,7 +68,7 @@ public class ServerWrapper {
         }
     }
     public void setAllowFlight(boolean booleanProperty) {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             ((net.minecraft.server.integrated.IntegratedServer)obj).setAllowFlight(booleanProperty);
         } catch (Error E1) {
             try {// 1.17 - 1.18
@@ -81,13 +81,13 @@ public class ServerWrapper {
         }
     }
     public void setResourcePack(String url, String hash) {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             ((net.minecraft.server.integrated.IntegratedServer)obj).setResourcePack(url, hash);
         } catch (Error E1) {
             try {// 1.17 - 1.18
                 ((net.minecraft.client.server.IntegratedServer)obj).m_129853_(url,hash);
             } catch (Error E2) {
-                if (splan.ClassExist("net.minecraft.server.MinecraftServer$ServerResourcePackInfo")) {//1.19
+                if (splan.ClassExist("net.minecraft.server.MinecraftServer$ServerResourcePackInfo")) {// 1.19
                     splan.instance.ResourcePackUrl=url;
                     splan.instance.ResourcePackHash=hash;
                 }
@@ -100,13 +100,13 @@ public class ServerWrapper {
         }
     }
     public String getServerOwner() {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             return ((net.minecraft.server.integrated.IntegratedServer)obj).getServerOwner();
         } catch (Error E1) {
             try {// 1.17 - 1.18
                 return ((net.minecraft.client.server.IntegratedServer)obj).m_129791_();
             } catch (Error E2) {
-                try {//1.19
+                try {// 1.19
                     return ((net.minecraft.client.server.IntegratedServer)obj).m_236731_().getName();
                 } catch (Error E3) {
                     splan.LOGGER.error("Error Getting Server Owner");
@@ -119,14 +119,14 @@ public class ServerWrapper {
         return null;
     }
     public String getWorldName() {
-        try {//1.13-1.15
+        try {// 1.13-1.15
             return ((net.minecraft.server.integrated.IntegratedServer)obj).getWorldName();
         } catch (Error E1) {
-            try {//1.16
+            try {// 1.16
                 return ((net.minecraft.server.integrated.IntegratedServer)obj).func_71214_G();
             } catch (Error E2) {
                 try {
-                    //1.17 - 1.18
+                    // 1.17 - 1.18
                     return ((net.minecraft.client.server.IntegratedServer)obj).m_129910_().m_5462_();
                 } catch (Error E3) {
                     splan.LOGGER.error("Error Getting World Name");
@@ -139,7 +139,7 @@ public class ServerWrapper {
         return null;
     }
     public void setMOTD(String stringProperty) {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             ((net.minecraft.server.integrated.IntegratedServer)obj).setMOTD(stringProperty);
         } catch (Error E1) {
             try {// 1.17 - 1.18
@@ -152,7 +152,7 @@ public class ServerWrapper {
         }
     }
     public void setPlayerIdleTimeout(int intProperty) {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             ((net.minecraft.server.integrated.IntegratedServer)obj).setPlayerIdleTimeout(intProperty);
         } catch (Error E1) {
             try {// 1.17 - 1.18
@@ -165,7 +165,7 @@ public class ServerWrapper {
         }
     }
     public boolean isServerInOnlineMode() {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             return ((net.minecraft.server.integrated.IntegratedServer)obj).isServerInOnlineMode();
         } catch (Error E1) {
             try {// 1.17 - 1.18
@@ -179,7 +179,7 @@ public class ServerWrapper {
         return true;
     }
     public boolean isPVPEnabled() {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             return ((net.minecraft.server.integrated.IntegratedServer)obj).isPVPEnabled();
         } catch (Error E1) {
             try {// 1.17 - 1.18
@@ -193,7 +193,7 @@ public class ServerWrapper {
         return true;
     }
     public boolean isFlightAllowed() {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             return ((net.minecraft.server.integrated.IntegratedServer)obj).isFlightAllowed();
         } catch (Error E1) {
             try {// 1.17 - 1.18
@@ -207,7 +207,7 @@ public class ServerWrapper {
         return false;
     }
     public int getMaxPlayerIdleMinutes() {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             return ((net.minecraft.server.integrated.IntegratedServer)obj).getMaxPlayerIdleMinutes();
         } catch (Error E1) {
             try {// 1.17 - 1.18
@@ -221,13 +221,13 @@ public class ServerWrapper {
         return 0;
     }
     public String getResourcePackUrl() {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             return ((net.minecraft.server.integrated.IntegratedServer)obj).getResourcePackUrl();
         } catch (Error E1) {
             try {// 1.17 - 1.18
                 return ((net.minecraft.client.server.IntegratedServer)obj).m_129795_();
             } catch (Error E2) {
-                if (splan.ClassExist("net.minecraft.server.MinecraftServer$ServerResourcePackInfo"))//1.19
+                if (splan.ClassExist("net.minecraft.server.MinecraftServer$ServerResourcePackInfo"))// 1.19
                     return splan.instance.ResourcePackUrl;
                 else {
                     splan.LOGGER.error("Error Getting Resource Pack URL");
@@ -239,13 +239,13 @@ public class ServerWrapper {
         return null;
     }
     public String getResourcePackHash() {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             return ((net.minecraft.server.integrated.IntegratedServer)obj).getResourcePackHash();
         } catch (Error E1) {
             try {// 1.17 - 1.18
                 return ((net.minecraft.client.server.IntegratedServer)obj).m_129796_();
             } catch (Error E2) {
-                if (splan.ClassExist("net.minecraft.server.MinecraftServer$ServerResourcePackInfo"))//1.19
+                if (splan.ClassExist("net.minecraft.server.MinecraftServer$ServerResourcePackInfo"))// 1.19
                     return splan.instance.ResourcePackHash;
                 else {
                     splan.LOGGER.error("Error Getting Resource Pack Hash");
@@ -257,7 +257,7 @@ public class ServerWrapper {
         return null;
     }
     public String getMOTD() {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             return ((net.minecraft.server.integrated.IntegratedServer)obj).getMOTD();
         } catch (Error E1) {
             try {// 1.17 - 1.18
@@ -271,7 +271,7 @@ public class ServerWrapper {
         return null;
     }
     public Object getPlayerList() {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             return ((net.minecraft.server.integrated.IntegratedServer)obj).getPlayerList();
         } catch (Error E1) {
             try {// 1.17 - 1.18
@@ -285,7 +285,7 @@ public class ServerWrapper {
         return null;
     }
     public int getMaxPlayers() {
-        try {//1.13 - 1.16
+        try {// 1.13 - 1.16
             return ((net.minecraft.server.integrated.IntegratedServer)obj).getMaxPlayers();
         } catch (Error E1) {
             try {// 1.17 - 1.18
@@ -302,7 +302,7 @@ public class ServerWrapper {
         return obj;
     }
     public java.nio.file.Path getWorldPath(String s) {
-        try {//1.16
+        try {// 1.16
             return ((net.minecraft.server.integrated.IntegratedServer)obj).func_240776_a_(new net.minecraft.world.storage.FolderName(s));
         } catch (Error E1) {
             try {// 1.17 - 1.19
@@ -314,5 +314,64 @@ public class ServerWrapper {
             }
         }
         return null;
+    }
+    public boolean terminateNetworkSystemEndpoints() {
+        try {//1.13 - 1.16
+            ((net.minecraft.server.integrated.IntegratedServer)obj).getNetworkSystem().terminateEndpoints();
+        } catch (Error E1) {
+            try {// 1.17 - 1.19
+                ((net.minecraft.client.server.IntegratedServer)obj).m_129919_().m_9718_();
+            } catch (Error E2) {
+                splan.LOGGER.error("Error Stopping LAN");
+                splan.LOGGER.error("Error 1:",E1);
+                splan.LOGGER.error("Error 2:",E2);
+                return false;
+            }
+        }
+        return true;
+    }
+    public boolean interruptLanServerPing() {
+        try {// 1.13
+            java.lang.reflect.Field f=splan.getField(net.minecraft.server.integrated.IntegratedServer.class,"lanPinger","field_71345_q");
+            net.minecraft.client.multiplayer.ThreadLanServerPing lsp=(net.minecraft.client.multiplayer.ThreadLanServerPing) f.get(obj);
+            lsp.interrupt();
+            f.set(obj,null);
+        } catch (Exception|Error E1) {
+            try {// 1.14 - 1.16
+                java.lang.reflect.Field f=splan.getField(net.minecraft.server.integrated.IntegratedServer.class,"lanPinger","field_71345_q");
+                net.minecraft.client.multiplayer.LanServerPingThread lsp=(net.minecraft.client.multiplayer.LanServerPingThread) f.get(obj);
+                lsp.interrupt();
+                f.set(obj,null);
+            } catch (Exception|Error E2) {
+                try {// 1.17 - 1.19
+                    java.lang.reflect.Field f=splan.getField(net.minecraft.client.server.IntegratedServer.class,"lanPinger","f_120018_");
+                    net.minecraft.client.server.LanServerPinger lsp=(net.minecraft.client.server.LanServerPinger) f.get(obj);
+                    lsp.interrupt();
+                    f.set(obj,null);
+                } catch (Exception|Error E3) {
+                    splan.LOGGER.error("Error Stopping LAN");
+                    splan.LOGGER.error("Error 1:",E1);
+                    splan.LOGGER.error("Error 2:",E2);
+                    splan.LOGGER.error("Error 3:",E3);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    public boolean setPublishedPort(int i) {
+        try {// 1.13 - 1.16
+            splan.getField(net.minecraft.server.integrated.IntegratedServer.class,"publishedPort","field_195580_l").set(obj,i);
+        } catch (Exception|Error E1) {
+            try {
+                splan.getField(net.minecraft.client.server.IntegratedServer.class,"publishedPort","f_120017_").set(obj,i);
+            } catch (Exception|Error E2) {
+                splan.LOGGER.error("Error Stopping LAN");
+                splan.LOGGER.error("Error 1:",E1);
+                splan.LOGGER.error("Error 2:",E2);
+                return false;
+            }
+        }
+        return true;
     }
 }

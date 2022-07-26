@@ -5,10 +5,10 @@ import java.lang.reflect.Field;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 
 public class EntityJoinWorldEvent3 {
-    public static void onEvent(EntityJoinWorldEvent event,ServerWrapper server) {
+    public static void onEvent(EntityJoinLevelEvent event,ServerWrapper server) {
         Entity entity;
         Field f;
         Object obj;

@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.util.regex.Pattern;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.LanServerPingThread;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.impl.BanCommand;
 import net.minecraft.command.impl.BanIpCommand;
@@ -65,6 +66,22 @@ public class splan {
         }
         instance = this;
         MinecraftForge.EVENT_BUS.register(this);
+    }
+    public boolean stop_LAN() {
+        try {
+            server.getNetworkSystem().terminateEndpoints();
+            getField(IntegratedServer.class,"publishedPort","field_195580_l").set(server,-1);
+            Field f=getField(IntegratedServer.class,"lanPinger","field_71345_q");
+            LanServerPingThread lsp=(LanServerPingThread) f.get(server);
+            lsp.interrupt();
+            f.set(server,null);
+            server.getPlayerList().setGameType(null);
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("Error stopping LAN");
+            LOGGER.error("",e);
+            return false;
+        }
     }
     /** Send server status to first player joined game */
     @SubscribeEvent
@@ -203,9 +220,7 @@ public class splan {
         PlayerList customPlayerList = server.getPlayerList();
         try {
             /** Max Players */
-            Field field = PlayerList.class.getDeclaredField("field_72405_c");
-            field.setAccessible(true);
-            field.set(customPlayerList, Integer.valueOf(ServerProperties.getIntProperty("max-players", 10)));
+            getField(PlayerList.class,"maxPlayers","field_72405_c").set(customPlayerList, Integer.valueOf(ServerProperties.getIntProperty("max-players", 10)));
             LOGGER.info("Max Players = " + customPlayerList.getMaxPlayers());
         } catch (Exception E1) {
             /** Something went wrong */
@@ -231,6 +246,7 @@ public class splan {
         StopCommand.register(dispatcher);
         WhitelistCommand.register(dispatcher);
         KickCommand.register(dispatcher);
+        StopLANCommand.register(dispatcher);
         if (firstRun)
             try {
                 /** copy global file to world directory */
@@ -285,5 +301,16 @@ public class splan {
     }
     public static boolean isCommandBlockEnabled() {
         return instance.bisCommandBlockEnabled;
+    }
+    private static Field getField(Class<?> c,String... fn) throws NoSuchFieldException {
+        for (String s:fn) {
+            try {
+                Field f;
+                f = c.getDeclaredField(s);
+                f.setAccessible(true);
+                return f;
+            } catch (NoSuchFieldException | SecurityException e) {}
+        }
+        throw new NoSuchFieldException();
     }
 }

@@ -1,3 +1,6 @@
+2.72:
+	minecraft 1.13 1.14 1.15 1.16 1.17 1.18 1.19:
+		command /stopLAN
 2.71:
     minecraft 1.19:
         resource-pack
