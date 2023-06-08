@@ -16,7 +16,7 @@ public class PlayerListWrapper {
                 Field field = splan.getField(net.minecraft.server.players.PlayerList.class,"f_11193_","maxPlayers");
                 field.setAccessible(true);
                 field.set((net.minecraft.server.players.PlayerList)obj,intProperty);
-            } catch (Error|Exception E2) {
+            } catch (Error|Exception E2) {// 1.19 - 1.20
                 splan.LOGGER.error("Error Setting max players:");
                 splan.LOGGER.error("Error 1:",E1);
                 splan.LOGGER.error("Error 2:",E2);

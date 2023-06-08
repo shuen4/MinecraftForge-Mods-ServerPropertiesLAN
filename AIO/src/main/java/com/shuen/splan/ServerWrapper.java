@@ -87,7 +87,7 @@ public class ServerWrapper {
             try {// 1.17 - 1.18
                 ((net.minecraft.client.server.IntegratedServer)obj).m_129853_(url,hash);
             } catch (Error E2) {
-                if (splan.ClassExist("net.minecraft.server.MinecraftServer$ServerResourcePackInfo")) {// 1.19
+                if (splan.ClassExist("net.minecraft.server.MinecraftServer$ServerResourcePackInfo")) {// 1.19 - 1.20
                     splan.instance.ResourcePackUrl=url;
                     splan.instance.ResourcePackHash=hash;
                 }
@@ -106,7 +106,7 @@ public class ServerWrapper {
             try {// 1.17 - 1.18
                 return ((net.minecraft.client.server.IntegratedServer)obj).m_129791_();
             } catch (Error E2) {
-                try {// 1.19
+                try {// 1.19 - 1.20
                     return ((net.minecraft.client.server.IntegratedServer)obj).m_236731_().getName();
                 } catch (Error E3) {
                     splan.LOGGER.error("Error Getting Server Owner");
@@ -227,7 +227,7 @@ public class ServerWrapper {
             try {// 1.17 - 1.18
                 return ((net.minecraft.client.server.IntegratedServer)obj).m_129795_();
             } catch (Error E2) {
-                if (splan.ClassExist("net.minecraft.server.MinecraftServer$ServerResourcePackInfo"))// 1.19
+                if (splan.ClassExist("net.minecraft.server.MinecraftServer$ServerResourcePackInfo"))// 1.19 - 1.20
                     return splan.instance.ResourcePackUrl;
                 else {
                     splan.LOGGER.error("Error Getting Resource Pack URL");
@@ -245,7 +245,7 @@ public class ServerWrapper {
             try {// 1.17 - 1.18
                 return ((net.minecraft.client.server.IntegratedServer)obj).m_129796_();
             } catch (Error E2) {
-                if (splan.ClassExist("net.minecraft.server.MinecraftServer$ServerResourcePackInfo"))// 1.19
+                if (splan.ClassExist("net.minecraft.server.MinecraftServer$ServerResourcePackInfo"))// 1.19 - 1.20
                     return splan.instance.ResourcePackHash;
                 else {
                     splan.LOGGER.error("Error Getting Resource Pack Hash");
@@ -305,7 +305,7 @@ public class ServerWrapper {
         try {// 1.16
             return ((net.minecraft.server.integrated.IntegratedServer)obj).func_240776_a_(new net.minecraft.world.storage.FolderName(s));
         } catch (Error E1) {
-            try {// 1.17 - 1.19
+            try {// 1.17 - 1.20
                 return ((net.minecraft.client.server.IntegratedServer)obj).m_129843_(new net.minecraft.world.level.storage.LevelResource(s));
             } catch (Error E2) {
                 splan.LOGGER.error("Error Getting World Path");
@@ -319,7 +319,7 @@ public class ServerWrapper {
         try {//1.13 - 1.16
             ((net.minecraft.server.integrated.IntegratedServer)obj).getNetworkSystem().terminateEndpoints();
         } catch (Error E1) {
-            try {// 1.17 - 1.19
+            try {// 1.17 - 1.20
                 ((net.minecraft.client.server.IntegratedServer)obj).m_129919_().m_9718_();
             } catch (Error E2) {
                 splan.LOGGER.error("Error Stopping LAN");
@@ -343,7 +343,7 @@ public class ServerWrapper {
                 lsp.interrupt();
                 f.set(obj,null);
             } catch (Exception|Error E2) {
-                try {// 1.17 - 1.19
+                try {// 1.17 - 1.20
                     java.lang.reflect.Field f=splan.getField(net.minecraft.client.server.IntegratedServer.class,"lanPinger","f_120018_");
                     net.minecraft.client.server.LanServerPinger lsp=(net.minecraft.client.server.LanServerPinger) f.get(obj);
                     lsp.interrupt();

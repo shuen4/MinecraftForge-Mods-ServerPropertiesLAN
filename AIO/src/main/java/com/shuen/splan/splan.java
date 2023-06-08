@@ -55,7 +55,7 @@ public class splan {
             MinecraftForge.EVENT_BUS.addListener(this::onServerStarting1);
         else if (ClassExist("net.minecraftforge.fmlserverevents.FMLServerStartingEvent"))// 1.17
             MinecraftForge.EVENT_BUS.addListener(this::onServerStarting2);
-        else if (ClassExist("net.minecraftforge.event.server.ServerStartingEvent"))// 1.18 - 1.19
+        else if (ClassExist("net.minecraftforge.event.server.ServerStartingEvent"))// 1.18 - 1.20
             MinecraftForge.EVENT_BUS.addListener(this::onServerStarting3);
         else
             LOGGER.error("Register Server Starting Event failed");
@@ -63,7 +63,7 @@ public class splan {
             MinecraftForge.EVENT_BUS.addListener(this::onServerStopped1);
         else if (ClassExist("net.minecraftforge.fmlserverevents.FMLServerStoppedEvent"))// 1.17
             MinecraftForge.EVENT_BUS.addListener(this::onServerStopped2);
-        else if (ClassExist("net.minecraftforge.event.server.ServerStoppedEvent"))// 1.18 - 1.19
+        else if (ClassExist("net.minecraftforge.event.server.ServerStoppedEvent"))// 1.18 - 1.20
             MinecraftForge.EVENT_BUS.addListener(this::onServerStopped3);
         else
             LOGGER.error("Register Server Stoped Event failed");
@@ -81,7 +81,7 @@ public class splan {
                 return false;
             try {// 1.13 - 1.16
                 ((net.minecraft.server.management.PlayerList)server.getPlayerList()).setGameType(null);
-            } catch (Error E1) {// 1.17 - 1.19
+            } catch (Error E1) {// 1.17 - 1.20
                 getField(net.minecraft.client.server.IntegratedServer.class,"publishedGameType","f_174966_").set(server.getObj(),null);
             }
             return true;
@@ -142,7 +142,7 @@ public class splan {
         else if (ClassExist("net.minecraft.network.chat.TextComponent"))// 1.17 - 1.18
             EntityJoinWorldEvent2.onEvent(event,server);
     }
-    // 1.19
+    // 1.19 - 1.20
     public void SendMessageToPlayer2(net.minecraftforge.event.entity.EntityJoinLevelEvent event) {
         if (server==null)
             return;
@@ -158,7 +158,7 @@ public class splan {
     public void onServerStopped2(net.minecraftforge.fmlserverevents.FMLServerStoppedEvent event) {
         onServerStopped(event);
     }
-    // 1.18 - 1.19
+    // 1.18 - 1.20
     public void onServerStopped3(net.minecraftforge.event.server.ServerStoppedEvent event) {
         onServerStopped(event);
     }
@@ -183,7 +183,7 @@ public class splan {
     public void onServerStarting2(net.minecraftforge.fmlserverevents.FMLServerStartingEvent event) {
         onServerStarting(event);
     }
-    // 1.18 - 1.19
+    // 1.18 - 1.20
     public void onServerStarting3(net.minecraftforge.event.server.ServerStartingEvent event) {
         onServerStarting(event);
     }
@@ -206,7 +206,7 @@ public class splan {
             try {// 1.17
                 server = new ServerWrapper(((net.minecraftforge.fmlserverevents.FMLServerStartingEvent)obj).getServer());   
             } catch (Error E2) {
-                try {// 1.18 - 1.19
+                try {// 1.18 - 1.20
                     server = new ServerWrapper(((net.minecraftforge.event.server.ServerStartingEvent)obj).getServer()); 
                 } catch (Error E3) {
                     LOGGER.error("Error parse ServerEvent");
@@ -221,7 +221,7 @@ public class splan {
             /** half hardcoded */
             worldrootdir = gameDir + File.separator + "saves" + File.separator + server.getFolderName() + File.separator;
         } catch (Error E1) {
-            try {// 1.16 - 1.19
+            try {// 1.16 - 1.20
                 worldrootdir = this.server.getWorldPath("").toString() + File.separator;
             } catch (Error E2) {
                 /** Something went wrong */
@@ -349,7 +349,7 @@ public class splan {
                 StopLANCommand1.register(dispatcher);
             else // 1.14 - 1.16
                 StopLANCommand2.register(dispatcher);
-        } catch (Error E) {// 1.17 - 1.19
+        } catch (Error E) {// 1.17 - 1.20
             CommandDispatcher<CommandSourceStack> dispatcher = server.getCommandManager1().m_82094_();
             net.minecraft.server.commands.BanIpCommands.m_136527_(dispatcher);
             net.minecraft.server.commands.BanListCommands.m_136543_(dispatcher);
@@ -367,8 +367,10 @@ public class splan {
             net.minecraft.server.commands.KickCommand.m_137795_(dispatcher);
             if (ClassExist("net.minecraft.network.chat.TextComponent"))// 1.17 - 1.18
                 StopLANCommand3.register(dispatcher);
-            else// 1.19
+            else if (ClassExist("net.minecraft.advancements.critereon.ItemInteractWithBlockTrigger"))// 1.19
                 StopLANCommand4.register(dispatcher);
+            else// 1.20
+            	StopLANCommand5.register(dispatcher);
         }
         if (firstRun)
             try {
