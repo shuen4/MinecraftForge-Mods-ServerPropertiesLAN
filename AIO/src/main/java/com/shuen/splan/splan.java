@@ -67,6 +67,8 @@ public class splan {
             MinecraftForge.EVENT_BUS.addListener(this::onServerStopped3);
         else
             LOGGER.error("Register Server Stoped Event failed");
+        if (ClassExist("net.minecraftforge.event.RegisterCommandsEvent"))// 1.16 - 1.20
+        	MinecraftForge.EVENT_BUS.addListener(this::onCommandsRegister);
         /** net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent = 1.13 - 1.17 */
         if(ClassExist("net.minecraftforge.fml.event.server.FMLServerStartingEvent"))// 1.13 - 1.16
             MinecraftForge.EVENT_BUS.addListener(this::onGuiInit);
@@ -324,9 +326,60 @@ public class splan {
             LOGGER.error("Unknown Error:");
             LOGGER.error("Error 1:",E1);
         }
+        if (!ClassExist("net.minecraftforge.event.RegisterCommandsEvent")) {
+        	// 1.13 - 1.15
+        	RegisterCommand(server.getCommandManager().getDispatcher());
+			try {
+	            //((net.minecraft.server.management.PlayerList)server.getPlayerList()).getBannedIPs().setLanServer(true);
+				Field f = getField(net.minecraft.server.management.PlayerList.class, "bannedIPs", "field_72413_h");
+				Object listObj = f.get((net.minecraft.server.management.PlayerList)server.getPlayerList());
+				f = getField(net.minecraft.server.management.UserList.class, "lanServer","field_152697_e");
+				f.set(listObj, true);
+	            //((net.minecraft.server.management.PlayerList)server.getPlayerList()).getBannedPlayers().setLanServer(true);
+				f = getField(net.minecraft.server.management.PlayerList.class, "bannedPlayers", "field_72401_g");
+				listObj = f.get((net.minecraft.server.management.PlayerList)server.getPlayerList());
+				f = getField(net.minecraft.server.management.UserList.class, "lanServer","field_152697_e");
+				f.set(listObj, true);
+	        	
+			} catch (Exception E1) {
+	            LOGGER.error("Error setting LanServer:");
+	            LOGGER.error("Error 1:",E1);
+			}
+        	
+        }
+        if (firstRun)
+            try {
+                /** copy global file to world directory */
+                Files.copy(global, local);
+                ServerProperties.setPropertiesFile(local);
+                ServerProperties.comment += System.getProperty("line.separator") 
+                                          + "overrideGlobalDefaults :" + System.getProperty("line.separator") 
+                                          + "\tspecify weather to use this file to override the global settings in the file \"" 
+                                          + global.getAbsolutePath() + "\"";
+                /** Generate property "overrideGlobalDefaults" */
+                ServerProperties.getBooleanProperty("overrideGlobalDefaults", true);
+                ServerProperties.saveProperties();
+            } catch (Exception e) {
+                /** Something went wrong */
+                LOGGER.error("Oops..! Couldn't copy to local server config file. Please manually copy the global server config file to your world save directory.");
+                LOGGER.error("Error:",e);
+            }
+    }
+
+    public void onCommandsRegister(net.minecraftforge.event.RegisterCommandsEvent event) {
+    	try {
+    		RegisterCommand(getField(event.getClass(), "dispatcher").get(event));
+		} catch (Exception e) {
+            LOGGER.error("Error Registering Commands");
+            LOGGER.error("Error:",e);
+			return;
+		}
+    }
+    public void RegisterCommand(Object obj) {
         /** useful command*/
         try {// 1.13 - 1.16
-            CommandDispatcher<CommandSource> dispatcher = server.getCommandManager().getDispatcher();
+            @SuppressWarnings("unchecked")
+			CommandDispatcher<CommandSource> dispatcher = (CommandDispatcher<CommandSource>)obj;
             net.minecraft.command.impl.BanIpCommand.register(dispatcher);
             net.minecraft.command.impl.BanListCommand.register(dispatcher);
             net.minecraft.command.impl.BanCommand.register(dispatcher);
@@ -341,16 +394,13 @@ public class splan {
             net.minecraft.command.impl.StopCommand.register(dispatcher);
             net.minecraft.command.impl.WhitelistCommand.register(dispatcher);
             net.minecraft.command.impl.KickCommand.register(dispatcher);
-            try {// 1.13 - 1.15 for /ban /ban-ip /banlist /pardon /pardon-ip commands
-                ((net.minecraft.server.management.PlayerList)server.getPlayerList()).func_72363_f().setLanServer(true);
-                ((net.minecraft.server.management.PlayerList)server.getPlayerList()).func_152608_h().setLanServer(true);
-            } catch (Error E) {}
             if (ClassExist("net.minecraft.util.text.TextComponentString"))// 1.13
                 StopLANCommand1.register(dispatcher);
             else // 1.14 - 1.16
                 StopLANCommand2.register(dispatcher);
         } catch (Error E) {// 1.17 - 1.20
-            CommandDispatcher<CommandSourceStack> dispatcher = server.getCommandManager1().m_82094_();
+            @SuppressWarnings("unchecked")
+			CommandDispatcher<CommandSourceStack> dispatcher = (CommandDispatcher<CommandSourceStack>)obj;
             net.minecraft.server.commands.BanIpCommands.m_136527_(dispatcher);
             net.minecraft.server.commands.BanListCommands.m_136543_(dispatcher);
             net.minecraft.server.commands.BanPlayerCommands.m_136558_(dispatcher);
@@ -372,23 +422,6 @@ public class splan {
             else// 1.20
             	StopLANCommand5.register(dispatcher);
         }
-        if (firstRun)
-            try {
-                /** copy global file to world directory */
-                Files.copy(global, local);
-                ServerProperties.setPropertiesFile(local);
-                ServerProperties.comment += System.getProperty("line.separator") 
-                                          + "overrideGlobalDefaults :" + System.getProperty("line.separator") 
-                                          + "\tspecify weather to use this file to override the global settings in the file \"" 
-                                          + global.getAbsolutePath() + "\"";
-                /** Generate property "overrideGlobalDefaults" */
-                ServerProperties.getBooleanProperty("overrideGlobalDefaults", true);
-                ServerProperties.saveProperties();
-            } catch (Exception e) {
-                /** Something went wrong */
-                LOGGER.error("Oops..! Couldn't copy to local server config file. Please manually copy the global server config file to your world save directory.");
-                LOGGER.error("Error:",e);
-            }
     }
     /** copied from net.minecraft.server.dedicated.DedicatedServer#loadResourcePackSHA */
     private String loadResourcePackSHA() {

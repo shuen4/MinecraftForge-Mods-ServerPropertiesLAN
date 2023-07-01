@@ -4,7 +4,7 @@ loaderVersion="[32,)"
 issueTrackerURL="https://github.com/shuen4/MinecraftForge-Mods-ServerPropertiesLAN/issues"
 [[mods]]
 modId="splan"
-version="2.72"
+version="2.73"
 displayName="Server Properties for LAN"
 displayURL="https://github.com/shuen4/MinecraftForge-Mods-ServerPropertiesLAN"
 logoFile="logo.png"

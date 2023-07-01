@@ -32,6 +32,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -217,23 +218,6 @@ public class splan {
             LOGGER.error("Unknown Error:");
             LOGGER.error("",E1);
         }
-        /** command */
-        CommandDispatcher<CommandSourceStack> dispatcher = server.getCommands().getDispatcher();
-        BanIpCommands.register(dispatcher);
-        BanListCommands.register(dispatcher);
-        BanPlayerCommands.register(dispatcher);
-        DeOpCommands.register(dispatcher);
-        OpCommand.register(dispatcher);
-        PardonCommand.register(dispatcher);
-        PardonIpCommand.register(dispatcher);
-        SaveAllCommand.register(dispatcher);
-        SaveOffCommand.register(dispatcher);
-        SaveOnCommand.register(dispatcher);
-        SetPlayerIdleTimeoutCommand.register(dispatcher);
-        StopCommand.register(dispatcher);
-        WhitelistCommand.register(dispatcher);
-        KickCommand.register(dispatcher);
-        StopLANCommand.register(dispatcher);
         if (firstRun)
             try {
                 /** copy global file to world directory */
@@ -251,6 +235,26 @@ public class splan {
                 LOGGER.error("Oops..! Couldn't copy to local server config file. Please manually copy the global server config file to your world save directory.");
                 LOGGER.error("",e);
             }
+    }
+    @SubscribeEvent
+    public void onCommandsRegister(RegisterCommandsEvent event) {
+        /** useful command*/
+        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
+        BanIpCommands.register(dispatcher);
+        BanListCommands.register(dispatcher);
+        BanPlayerCommands.register(dispatcher);
+        DeOpCommands.register(dispatcher);
+        OpCommand.register(dispatcher);
+        PardonCommand.register(dispatcher);
+        PardonIpCommand.register(dispatcher);
+        SaveAllCommand.register(dispatcher);
+        SaveOffCommand.register(dispatcher);
+        SaveOnCommand.register(dispatcher);
+        SetPlayerIdleTimeoutCommand.register(dispatcher);
+        StopCommand.register(dispatcher);
+        WhitelistCommand.register(dispatcher);
+        KickCommand.register(dispatcher);
+        StopLANCommand.register(dispatcher);
     }
     /** copied from net.minecraft.server.dedicated.DedicatedServer#loadResourcePackSHA */
     private String loadResourcePackSHA() {
