@@ -1,0 +1,1 @@
+**Delete the "net" folder in the compiled jar, otherwise minecraft will crash**
