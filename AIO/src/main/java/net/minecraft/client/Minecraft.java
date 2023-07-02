@@ -1,7 +1,5 @@
 package net.minecraft.client;
 
-import java.io.File;
-
 public class Minecraft {
 
 	public static Minecraft getInstance() {
@@ -14,7 +12,7 @@ public class Minecraft {
 		return null;
 	}
 
-	public File gameDir;
-	public File f_91069_;
+	public java.io.File gameDir;
+	public java.io.File f_91069_;
 
 }

@@ -1,14 +1,8 @@
 package net.minecraft.client.server;
 
-import java.nio.file.Path;
-
-import net.minecraft.server.players.PlayerList;
-import net.minecraft.world.level.storage.LevelResource;
-import net.minecraft.world.level.storage.WorldData;
-
 public class IntegratedServer {
 
-	public WorldData m_129910_() {
+	public net.minecraft.world.level.storage.WorldData m_129910_() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -83,7 +77,7 @@ public class IntegratedServer {
 		return null;
 	}
 
-	public PlayerList m_6846_() {
+	public net.minecraft.server.players.PlayerList m_6846_() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -98,7 +92,7 @@ public class IntegratedServer {
 		return null;
 	}
 
-	public Path m_129843_(LevelResource levelResource) {
+	public java.nio.file.Path m_129843_(net.minecraft.world.level.storage.LevelResource levelResource) {
 		// TODO Auto-generated method stub
 		return null;
 	}

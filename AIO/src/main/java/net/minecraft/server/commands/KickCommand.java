@@ -1,12 +1,8 @@
 package net.minecraft.server.commands;
 
-import com.mojang.brigadier.CommandDispatcher;
-
-import net.minecraft.commands.CommandSourceStack;
-
 public class KickCommand {
 
-	public static void m_137795_(CommandDispatcher<CommandSourceStack> dispatcher) {
+	public static void m_137795_(com.mojang.brigadier.CommandDispatcher<net.minecraft.commands.CommandSourceStack> dispatcher) {
 		// TODO Auto-generated method stub
 		
 	}

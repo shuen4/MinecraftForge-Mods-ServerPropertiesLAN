@@ -1,23 +1,18 @@
 package net.minecraft.command;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-
-import net.minecraft.commands.CommandSourceStack;
-
 public class Commands {
 
-	public CommandDispatcher<CommandSource> getDispatcher() {
+	public com.mojang.brigadier.CommandDispatcher<net.minecraft.commands.CommandSourceStack> getDispatcher() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public CommandDispatcher<CommandSourceStack> m_82094_() {
+	public com.mojang.brigadier.CommandDispatcher<net.minecraft.commands.CommandSourceStack> m_82094_() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public static LiteralArgumentBuilder<CommandSource> literal(String string) {
+	public static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSource> literal(String string) {
 		// TODO Auto-generated method stub
 		return null;
 	}

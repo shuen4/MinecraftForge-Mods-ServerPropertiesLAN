@@ -1,14 +1,8 @@
 package net.minecraft.server.integrated;
 
-import java.nio.file.Path;
-
-import net.minecraft.command.Commands;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.world.storage.FolderName;
-
 public class IntegratedServer {
 
-	public Path func_240776_a_(FolderName folderName) {
+	public java.nio.file.Path func_240776_a_(net.minecraft.world.storage.FolderName folderName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -18,7 +12,7 @@ public class IntegratedServer {
 		return 0;
 	}
 
-	public PlayerList getPlayerList() {
+	public net.minecraft.server.management.PlayerList getPlayerList() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -103,7 +97,7 @@ public class IntegratedServer {
 		
 	}
 
-	public Commands getCommandManager() {
+	public net.minecraft.command.Commands getCommandManager() {
 		// TODO Auto-generated method stub
 		return null;
 	}

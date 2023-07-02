@@ -1,7 +1,5 @@
 package net.minecraft.world.level.storage;
 
-import java.nio.file.Path;
-
 public class LevelStorageSource {
    public class LevelStorageAccess implements AutoCloseable {
 
@@ -11,7 +9,7 @@ public class LevelStorageSource {
 		
 	}
 
-	public Path getWorldDir() {
+	public java.nio.file.Path getWorldDir() {
 		// TODO Auto-generated method stub
 		return null;
 	}
