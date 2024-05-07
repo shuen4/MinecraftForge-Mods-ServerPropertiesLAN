@@ -1,5 +1,5 @@
 2.73
-+ fix commands not re-register when reloaded
++ fix commands not re-register when reloaded on 1.16 - 1.20
 + fix /ban /ban-ip /banlist /pardon /pardon-ip commands display permission error on AIO 1.14 - 1.15
 
 2.72
